@@ -14,8 +14,6 @@ public record IngestResult(
     IReadOnlyList<RuleAlert> Alerts
 );
 
-public record IndicatorPoint(string CountryCode, int Year, decimal Value);
-
 public class IngestionService(
     IngestionDbContext db,
     WorldBankClient worldBankClient,
@@ -24,6 +22,8 @@ public class IngestionService(
     ILogger<IngestionService> logger
 )
 {
+    private const int LatestIndicatorsReturned = 5;
+
     public async Task<IReadOnlyList<IngestResult>> IngestAllAsync(
         CancellationToken cancellationToken = default
     )
@@ -53,25 +53,14 @@ public class IngestionService(
             );
 
         var points = await FetchAsync(definition, cancellationToken);
+        var source = await GetOrCreateSourceAsync(definition, cancellationToken);
 
-        // Reuse the data_source row for this API series, creating it on the first ingest.
-        var source = await db.DataSources.FirstOrDefaultAsync(
-            s => s.SourceIdentifier == definition.SourceIdentifier,
-            cancellationToken
-        );
-
-        if (source is null)
-        {
-            source = new DataSource
-            {
-                SourceName = definition.SourceName,
-                SourceIdentifier = definition.SourceIdentifier,
-                SourceType = "api",
-                TrustedStatus = "trusted",
-            };
-            db.DataSources.Add(source);
-            await db.SaveChangesAsync(cancellationToken);
-        }
+        // Upsert by source, indicator and period so re-running an ingest updates values instead of duplicating them.
+        var existingByPeriod = await db
+            .ExternalIndicators.Where(i =>
+                i.SourceId == source.SourceId && i.IndicatorCode == definition.Code
+            )
+            .ToDictionaryAsync(i => i.RelevantPeriod, cancellationToken);
 
         var savedIndicators = new List<ExternalIndicator>();
 
@@ -79,16 +68,7 @@ public class IngestionService(
         {
             var period = point.Year.ToString();
 
-            // Upsert by source, indicator and period so re-running an ingest updates values instead of duplicating them.
-            var indicator = await db.ExternalIndicators.FirstOrDefaultAsync(
-                i =>
-                    i.SourceId == source.SourceId
-                    && i.IndicatorCode == definition.Code
-                    && i.RelevantPeriod == period,
-                cancellationToken
-            );
-
-            if (indicator is null)
+            if (!existingByPeriod.TryGetValue(period, out var indicator))
             {
                 indicator = new ExternalIndicator
                 {
@@ -97,6 +77,7 @@ public class IngestionService(
                     RelevantPeriod = period,
                 };
                 db.ExternalIndicators.Add(indicator);
+                existingByPeriod[period] = indicator;
             }
 
             indicator.IndicatorName = indicatorType.DisplayName;
@@ -128,61 +109,77 @@ public class IngestionService(
             source.SourceId,
             savedIndicators.Count,
             alerts.Count,
-            savedIndicators.OrderByDescending(i => i.RelevantPeriod).Take(5).ToList(),
+            savedIndicators
+                .OrderByDescending(i => i.RelevantPeriod)
+                .Take(LatestIndicatorsReturned)
+                .ToList(),
             alerts
         );
+    }
+
+    // Reuses the data_source row for this API series, creating it on the first ingest.
+    private async Task<DataSource> GetOrCreateSourceAsync(
+        IndicatorDefinition definition,
+        CancellationToken cancellationToken
+    )
+    {
+        var source = await db.DataSources.FirstOrDefaultAsync(
+            s => s.SourceIdentifier == definition.SourceIdentifier,
+            cancellationToken
+        );
+
+        if (source is not null)
+        {
+            return source;
+        }
+
+        source = new DataSource
+        {
+            SourceName = definition.SourceName,
+            SourceIdentifier = definition.SourceIdentifier,
+            SourceType = SourceTypes.Api,
+            TrustedStatus = TrustedStatuses.Trusted,
+        };
+        db.DataSources.Add(source);
+        await db.SaveChangesAsync(cancellationToken);
+        return source;
     }
 
     private async Task<IReadOnlyList<IndicatorPoint>> FetchAsync(
         IndicatorDefinition definition,
         CancellationToken cancellationToken
-    )
-    {
-        switch (definition.Provider)
+    ) =>
+        definition.Provider switch
         {
-            case IndicatorProvider.WorldBank:
-                var worldBankPoints = await worldBankClient.FetchIndicatorAsync(
-                    IndicatorCatalog.CountryCode,
-                    definition.SeriesKey,
-                    cancellationToken: cancellationToken
-                );
-                return worldBankPoints
-                    .Select(p => new IndicatorPoint(p.CountryCode, p.Year, p.Value))
-                    .ToList();
-
-            case IndicatorProvider.Oecd:
-                var oecdPoints = await oecdClient.FetchAnnualInflationAsync(
-                    definition.SeriesKey,
-                    cancellationToken: cancellationToken
-                );
-                return oecdPoints
-                    .Select(p => new IndicatorPoint(p.CountryCode, p.Year, p.Value))
-                    .ToList();
-
-            default:
-                throw new NotSupportedException($"Unknown provider {definition.Provider}.");
-        }
-    }
+            IndicatorProvider.WorldBank => await worldBankClient.FetchIndicatorAsync(
+                definition.SeriesKey,
+                cancellationToken: cancellationToken
+            ),
+            IndicatorProvider.Oecd => await oecdClient.FetchAnnualInflationAsync(
+                definition.SeriesKey,
+                cancellationToken: cancellationToken
+            ),
+            _ => throw new NotSupportedException($"Unknown provider {definition.Provider}."),
+        };
 
     // Wrong country or impossible years are rejected; extreme but possible price changes
-    // are flagged for review. Only "validated" values can raise rule alerts.
+    // are flagged for review. Only validated values can raise rule alerts.
     private static string Validate(IndicatorPoint point)
     {
-        if (point.CountryCode != IndicatorCatalog.CountryCode)
+        if (
+            point.CountryCode != IndicatorCatalog.CountryCode
+            || point.Year < 1990
+            || point.Year > DateTime.UtcNow.Year
+        )
         {
-            return "rejected";
-        }
-
-        if (point.Year < 1990 || point.Year > DateTime.UtcNow.Year)
-        {
-            return "rejected";
+            return ValidationStatuses.Rejected;
         }
 
         if (point.Value < -50m || point.Value > 100m)
         {
-            return "flagged";
+            return ValidationStatuses.Flagged;
         }
 
-        return "validated";
+        return ValidationStatuses.Validated;
     }
 }

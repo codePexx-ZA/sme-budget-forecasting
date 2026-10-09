@@ -1,5 +1,6 @@
 // API endpoints for reading stored indicators, the indicator catalog, categories and rule alerts.
 using BudgetIngestion.Data;
+using BudgetIngestion.Models;
 using BudgetIngestion.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -64,14 +65,16 @@ public class IndicatorsController(IngestionDbContext db) : ControllerBase
 
         var thresholds = await db
             .RuleDefinitions.AsNoTracking()
-            .Where(r => r.IndicatorCode != null && r.ActiveStatus == "active")
+            .Where(r => r.IndicatorCode != null && r.ActiveStatus == ActiveStatuses.Active)
             .Select(r => new { r.IndicatorCode, r.ThresholdValue })
             .ToListAsync(cancellationToken);
+
+        var typesByCode = types.ToDictionary(t => t.IndicatorCode);
 
         // Combines the code-side fetch settings with names, categories and thresholds stored in the database.
         var catalog = IndicatorCatalog.All.Select(d =>
         {
-            var type = types.FirstOrDefault(t => t.IndicatorCode == d.Code);
+            var type = typesByCode.GetValueOrDefault(d.Code);
             return new
             {
                 d.Code,

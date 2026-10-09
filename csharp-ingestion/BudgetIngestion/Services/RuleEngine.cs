@@ -17,7 +17,7 @@ public class RuleEngine(IngestionDbContext db, ILogger<RuleEngine> logger)
         var rules = await db
             .RuleDefinitions.Where(r =>
                 r.IndicatorCode == indicatorCode
-                && r.ActiveStatus == "active"
+                && r.ActiveStatus == ActiveStatuses.Active
                 && r.ThresholdValue != null
             )
             .ToListAsync(cancellationToken);
@@ -25,7 +25,7 @@ public class RuleEngine(IngestionDbContext db, ILogger<RuleEngine> logger)
         if (rules.Count == 0)
         {
             logger.LogInformation("No active rules for {Code}; no alerts evaluated.", indicatorCode);
-            return Array.Empty<RuleAlert>();
+            return [];
         }
 
         var displayName = await db
@@ -43,7 +43,7 @@ public class RuleEngine(IngestionDbContext db, ILogger<RuleEngine> logger)
 
         // Flagged or rejected values never raise alerts.
         var validated = indicators
-            .Where(i => i.IndicatorCode == indicatorCode && i.ValidationStatus == "validated")
+            .Where(i => i.IndicatorCode == indicatorCode && i.ValidationStatus == ValidationStatuses.Validated)
             .ToList();
 
         var alerts = new List<RuleAlert>();
@@ -82,9 +82,9 @@ public class RuleEngine(IngestionDbContext db, ILogger<RuleEngine> logger)
                 var alert = new RuleAlert
                 {
                     RuleId = rule.RuleId,
-                    Severity = "warning",
+                    Severity = AlertSeverities.Warning,
                     Message = message,
-                    ResolutionStatus = "open",
+                    ResolutionStatus = ResolutionStatuses.Open,
                     CreatedAt = DateTime.UtcNow,
                 };
 

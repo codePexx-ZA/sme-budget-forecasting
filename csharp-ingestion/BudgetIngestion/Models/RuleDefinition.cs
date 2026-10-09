@@ -11,7 +11,7 @@ public class RuleDefinition
     public string Action { get; set; } = string.Empty;
     public string? IndicatorCode { get; set; }
     public decimal? ThresholdValue { get; set; }
-    public string ActiveStatus { get; set; } = "active";
+    public string ActiveStatus { get; set; } = ActiveStatuses.Active;
 
     [JsonIgnore]
     public ICollection<RuleAlert> Alerts { get; set; } = new List<RuleAlert>();

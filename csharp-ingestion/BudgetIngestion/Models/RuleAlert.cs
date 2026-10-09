@@ -9,9 +9,9 @@ public class RuleAlert
     public string RuleId { get; set; } = string.Empty;
     public string? UnitId { get; set; }
     public string? RunId { get; set; }
-    public string Severity { get; set; } = "info";
+    public string Severity { get; set; } = AlertSeverities.Info;
     public string Message { get; set; } = string.Empty;
-    public string ResolutionStatus { get; set; } = "open";
+    public string ResolutionStatus { get; set; } = ResolutionStatuses.Open;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [JsonIgnore]

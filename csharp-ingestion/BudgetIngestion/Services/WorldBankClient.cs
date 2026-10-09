@@ -3,22 +3,11 @@ using System.Text.Json;
 
 namespace BudgetIngestion.Services;
 
-public record WorldBankIndicatorPoint(
-    string CountryCode,
-    string IndicatorCode,
-    string IndicatorName,
-    int Year,
-    decimal Value
-);
-
 public class WorldBankClient(HttpClient httpClient, ILogger<WorldBankClient> logger)
 {
-    public const string DefaultIndicatorCode = "FP.CPI.TOTL.ZG";
-    public const string DefaultCountryCode = "ZAF";
-
-    public async Task<IReadOnlyList<WorldBankIndicatorPoint>> FetchIndicatorAsync(
-        string countryCode = DefaultCountryCode,
-        string indicatorCode = DefaultIndicatorCode,
+    public async Task<IReadOnlyList<IndicatorPoint>> FetchIndicatorAsync(
+        string indicatorCode,
+        string countryCode = IndicatorCatalog.CountryCode,
         int years = IndicatorCatalog.HistoryYears,
         CancellationToken cancellationToken = default
     )
@@ -51,10 +40,10 @@ public class WorldBankClient(HttpClient httpClient, ILogger<WorldBankClient> log
         var rows = document.RootElement[1];
         if (rows.ValueKind == JsonValueKind.Null)
         {
-            return Array.Empty<WorldBankIndicatorPoint>();
+            return [];
         }
 
-        var results = new List<WorldBankIndicatorPoint>();
+        var results = new List<IndicatorPoint>();
 
         foreach (var row in rows.EnumerateArray())
         {
@@ -62,34 +51,20 @@ public class WorldBankClient(HttpClient httpClient, ILogger<WorldBankClient> log
             if (
                 !row.TryGetProperty("value", out var valueElement)
                 || valueElement.ValueKind == JsonValueKind.Null
+                || !row.TryGetProperty("date", out var dateElement)
+                || !int.TryParse(dateElement.GetString(), out var year)
             )
             {
                 continue;
             }
 
-            if (!row.TryGetProperty("date", out var dateElement))
-            {
-                continue;
-            }
-
-            if (!int.TryParse(dateElement.GetString(), out var year))
-            {
-                continue;
-            }
-
-            var value = valueElement.GetDecimal();
-            var indicatorName =
-                row.GetProperty("indicator").GetProperty("value").GetString() ?? indicatorCode;
             var country = row.GetProperty("countryiso3code").GetString() ?? countryCode;
-
             if (!string.Equals(country, countryCode, StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
-            results.Add(
-                new WorldBankIndicatorPoint(country, indicatorCode, indicatorName, year, value)
-            );
+            results.Add(new IndicatorPoint(country, year, valueElement.GetDecimal()));
         }
 
         logger.LogInformation(

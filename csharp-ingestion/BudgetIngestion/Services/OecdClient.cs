@@ -3,14 +3,12 @@ using System.Globalization;
 
 namespace BudgetIngestion.Services;
 
-public record OecdIndicatorPoint(string CountryCode, string SeriesKey, int Year, decimal Value);
-
 public class OecdClient(HttpClient httpClient, ILogger<OecdClient> logger)
 {
     private const string BaseUrl =
         "https://sdmx.oecd.org/public/rest/data/OECD.SDD.TPS,DSD_PRICES@DF_PRICES_ALL,1.0";
 
-    public async Task<IReadOnlyList<OecdIndicatorPoint>> FetchAnnualInflationAsync(
+    public async Task<IReadOnlyList<IndicatorPoint>> FetchAnnualInflationAsync(
         string seriesKey,
         string countryCode = IndicatorCatalog.CountryCode,
         int years = IndicatorCatalog.HistoryYears,
@@ -34,7 +32,7 @@ public class OecdClient(HttpClient httpClient, ILogger<OecdClient> logger)
 
         if (lines.Length == 0)
         {
-            return Array.Empty<OecdIndicatorPoint>();
+            return [];
         }
 
         // Columns are found by header name because the CSV column order is not guaranteed.
@@ -48,23 +46,16 @@ public class OecdClient(HttpClient httpClient, ILogger<OecdClient> logger)
             throw new InvalidOperationException("Unexpected OECD response shape.");
         }
 
-        var results = new List<OecdIndicatorPoint>();
+        var lastIndex = Math.Max(areaIndex, Math.Max(periodIndex, valueIndex));
+        var results = new List<IndicatorPoint>();
 
         foreach (var line in lines.Skip(1))
         {
             var fields = line.Split(',');
-            if (fields.Length <= valueIndex)
-            {
-                continue;
-            }
-
-            if (!int.TryParse(fields[periodIndex], out var year))
-            {
-                continue;
-            }
-
             if (
-                !decimal.TryParse(
+                fields.Length <= lastIndex
+                || !int.TryParse(fields[periodIndex], out var year)
+                || !decimal.TryParse(
                     fields[valueIndex],
                     NumberStyles.Float,
                     CultureInfo.InvariantCulture,
@@ -81,7 +72,7 @@ public class OecdClient(HttpClient httpClient, ILogger<OecdClient> logger)
                 continue;
             }
 
-            results.Add(new OecdIndicatorPoint(country, seriesKey, year, value));
+            results.Add(new IndicatorPoint(country, year, value));
         }
 
         logger.LogInformation(

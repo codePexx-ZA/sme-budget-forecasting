@@ -2,6 +2,7 @@
 
 import uuid
 from collections import defaultdict
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date
 
@@ -11,6 +12,8 @@ from psycopg.types.json import Jsonb
 from app import algorithms
 
 MONTHS_PER_PERIOD = {"monthly": 1, "quarterly": 3, "annual": 12}
+
+RUN_COLUMNS = "run_id, unit_id, forecasting_method, history_start, history_end, parameters, created_at"
 
 # Below these counts the forecast still runs, but the user is warned to treat it with caution.
 RECOMMENDED_PERIODS = {"monthly": 24, "quarterly": 8, "annual": 3}
@@ -107,12 +110,11 @@ def load_history(conn: psycopg.Connection, request: ForecastRequest) -> History:
     return History(series=series, warnings=warnings)
 
 
-def run_forecast(conn: psycopg.Connection, request: ForecastRequest) -> list[dict]:
-    history = load_history(conn, request)
-    warnings = list(history.warnings)
-    step = MONTHS_PER_PERIOD[request.frequency]
-
+def select_usable_series(
+    history: History, request: ForecastRequest, warnings: list[str]
+) -> dict[str, list[tuple[date, float]]]:
     # Categories shorter than the Moving Average window are skipped; gaps are allowed but reported.
+    step = MONTHS_PER_PERIOD[request.frequency]
     usable: dict[str, list[tuple[date, float]]] = {}
     for category, points in sorted(history.series.items()):
         if len(points) < request.window_size:
@@ -130,24 +132,29 @@ def run_forecast(conn: psycopg.Connection, request: ForecastRequest) -> list[dic
         raise ForecastError(
             f"No category has at least {request.window_size} approved {request.frequency} periods to forecast."
         )
+    return usable
 
-    history_start = min(points[0][0] for points in usable.values())
-    history_end = max(points[-1][0] for points in usable.values())
+
+def history_warnings(
+    usable: dict[str, list[tuple[date, float]]], frequency: str, history_end: date
+) -> list[str]:
+    warnings: list[str] = []
     shortest = min(len(points) for points in usable.values())
-    if shortest < RECOMMENDED_PERIODS[request.frequency]:
+    if shortest < RECOMMENDED_PERIODS[frequency]:
         warnings.append(
-            f"Short history: {shortest} {request.frequency} periods "
-            f"(recommended at least {RECOMMENDED_PERIODS[request.frequency]}). Treat forecasts with caution."
+            f"Short history: {shortest} {frequency} periods "
+            f"(recommended at least {RECOMMENDED_PERIODS[frequency]}). Treat forecasts with caution."
         )
     for category, points in usable.items():
         if points[-1][0] != history_end:
             warnings.append(f"{category}: no figure for the latest period ({history_end}).")
+    return warnings
 
-    future_periods = [add_months(history_end, step * k) for k in range(1, request.horizon + 1)]
 
+def forecast_methods(request: ForecastRequest) -> dict[str, tuple[dict, Callable[[list[float]], list[float]]]]:
     # Both methods run on the same history and are saved as separate runs,
     # so the user can compare them and choose which becomes the budget.
-    methods = {
+    return {
         "moving_average": (
             {"window_size": request.window_size},
             lambda values: algorithms.moving_average_forecast(values, request.window_size, request.horizon),
@@ -158,10 +165,23 @@ def run_forecast(conn: psycopg.Connection, request: ForecastRequest) -> list[dic
         ),
     }
 
+
+def run_forecast(conn: psycopg.Connection, request: ForecastRequest) -> list[dict]:
+    history = load_history(conn, request)
+    warnings = list(history.warnings)
+    usable = select_usable_series(history, request, warnings)
+
+    history_start = min(points[0][0] for points in usable.values())
+    history_end = max(points[-1][0] for points in usable.values())
+    warnings.extend(history_warnings(usable, request.frequency, history_end))
+
+    step = MONTHS_PER_PERIOD[request.frequency]
+    future_periods = [add_months(history_end, step * k) for k in range(1, request.horizon + 1)]
+
     # One transaction: if any insert fails, neither run is saved.
     run_ids = []
     with conn.transaction():
-        for method, (method_params, forecast) in methods.items():
+        for method, (method_params, forecast) in forecast_methods(request).items():
             run_id = uuid.uuid4().hex
             parameters = {
                 **method_params,
@@ -176,16 +196,19 @@ def run_forecast(conn: psycopg.Connection, request: ForecastRequest) -> list[dic
                 """,
                 (run_id, request.unit_id, method, history_start, history_end, Jsonb(parameters)),
             )
-            for category, points in usable.items():
-                values = [amount for _, amount in points]
-                for period, amount in zip(future_periods, forecast(values)):
-                    conn.execute(
-                        """
-                        INSERT INTO forecast_value (value_id, run_id, category, forecast_period, baseline_amount)
-                        VALUES (%s, %s, %s, %s, %s)
-                        """,
-                        (uuid.uuid4().hex, run_id, category, period, amount),
-                    )
+            value_rows = [
+                (uuid.uuid4().hex, run_id, category, period, amount)
+                for category, points in usable.items()
+                for period, amount in zip(future_periods, forecast([amount for _, amount in points]))
+            ]
+            with conn.cursor() as cur:
+                cur.executemany(
+                    """
+                    INSERT INTO forecast_value (value_id, run_id, category, forecast_period, baseline_amount)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    value_rows,
+                )
             run_ids.append(run_id)
 
     return [get_run(conn, run_id) for run_id in run_ids]
@@ -193,8 +216,8 @@ def run_forecast(conn: psycopg.Connection, request: ForecastRequest) -> list[dic
 
 def get_run(conn: psycopg.Connection, run_id: str) -> dict | None:
     run = conn.execute(
-        """
-        SELECT run_id, unit_id, forecasting_method, history_start, history_end, parameters, created_at
+        f"""
+        SELECT {RUN_COLUMNS}
         FROM forecast_run
         WHERE run_id = %s
         """,
@@ -218,8 +241,8 @@ def get_run(conn: psycopg.Connection, run_id: str) -> dict | None:
 
 def list_runs(conn: psycopg.Connection, unit_id: str | None, take: int) -> list[dict]:
     return conn.execute(
-        """
-        SELECT run_id, unit_id, forecasting_method, history_start, history_end, parameters, created_at
+        f"""
+        SELECT {RUN_COLUMNS}
         FROM forecast_run
         WHERE %(unit_id)s::varchar IS NULL OR unit_id = %(unit_id)s
         ORDER BY created_at DESC

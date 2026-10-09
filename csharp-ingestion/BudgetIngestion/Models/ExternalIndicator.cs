@@ -12,7 +12,7 @@ public class ExternalIndicator
     public decimal IndicatorValue { get; set; }
     public string MeasurementUnit { get; set; } = string.Empty;
     public string RelevantPeriod { get; set; } = string.Empty; // calendar year as text, e.g. "2024"
-    public string ValidationStatus { get; set; } = "pending";
+    public string ValidationStatus { get; set; } = ValidationStatuses.Pending;
     public DateTime CollectedAt { get; set; } = DateTime.UtcNow;
 
     [JsonIgnore]

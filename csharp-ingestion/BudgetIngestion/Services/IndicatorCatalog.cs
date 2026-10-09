@@ -15,6 +15,9 @@ public record IndicatorDefinition(
     string SourceIdentifier
 );
 
+// One annual value returned by either API client.
+public record IndicatorPoint(string CountryCode, int Year, decimal Value);
+
 // Only fetch settings live here. Every Code must also exist in indicator_type; names,
 // linked categories and rule thresholds are reference data in 02_reference_data.sql.
 public static class IndicatorCatalog
