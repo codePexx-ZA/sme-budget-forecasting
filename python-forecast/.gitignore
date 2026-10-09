@@ -1,0 +1,5 @@
+# Python cache, virtual environment and secrets for the forecasting service that git must not track.
+__pycache__/
+*.pyc
+.venv/
+.env

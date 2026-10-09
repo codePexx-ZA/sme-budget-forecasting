@@ -1,0 +1,8 @@
+# Build output, IDE files and secrets for the C# ingestion service that git must not track.
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/*.user
+**/appsettings.*.local.json
+.env

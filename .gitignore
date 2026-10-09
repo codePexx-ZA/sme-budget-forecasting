@@ -1,0 +1,28 @@
+# Files and folders git must not track: private notes, secrets, real business data, build output and IDE settings.
+CAPSTONE.md
+Project Progress.xlsx
+
+.env
+**/appsettings.*.local.json
+
+# Real business data must never be committed (POPIA and participant consent).
+data/
+!csharp-ingestion/BudgetIngestion/Data/
+*.xlsx
+*.xls
+*.csv
+!**/templates/*.xlsx
+
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/target/
+**/__pycache__/
+*.pyc
+.venv/
+
+.vs/
+.idea/
+.vscode/
+*.user

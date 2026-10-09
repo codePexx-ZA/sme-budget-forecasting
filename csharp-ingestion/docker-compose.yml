@@ -1,0 +1,50 @@
+# Runs the full system locally: PostgreSQL, the C# ingestion API and the Python forecasting API.
+name: budget-system
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: budget-postgres
+    environment:
+      POSTGRES_DB: budget_prototype
+      POSTGRES_USER: budget
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in csharp-ingestion/.env (copy .env.example)}
+    ports:
+      - "5432:5432"
+    volumes:
+      - budget_pgdata:/var/lib/postgresql/data
+      - ../database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U budget -d budget_prototype"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: BudgetIngestion/Dockerfile
+    container_name: budget-ingestion
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=budget_prototype;Username=budget;Password=${POSTGRES_PASSWORD}
+    ports:
+      - "5080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  forecast:
+    build:
+      context: ../python-forecast
+    container_name: budget-forecast
+    environment:
+      DATABASE_URL: postgresql://budget:${POSTGRES_PASSWORD}@postgres:5432/budget_prototype
+    ports:
+      - "5090:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  budget_pgdata:

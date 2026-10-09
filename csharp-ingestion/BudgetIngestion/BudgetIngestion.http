@@ -1,0 +1,17 @@
+# Sample HTTP requests for manually testing the ingestion API endpoints.
+@BudgetIngestion_HostAddress = http://localhost:5080
+
+###
+POST {{BudgetIngestion_HostAddress}}/api/ingestion/run
+
+###
+POST {{BudgetIngestion_HostAddress}}/api/ingestion/fuel_price
+
+###
+GET {{BudgetIngestion_HostAddress}}/api/indicators/catalog
+
+###
+GET {{BudgetIngestion_HostAddress}}/api/indicators?code=electricity_price&take=10
+
+###
+GET {{BudgetIngestion_HostAddress}}/api/indicators/alerts?take=20
