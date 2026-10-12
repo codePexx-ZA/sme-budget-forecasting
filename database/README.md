@@ -16,7 +16,7 @@ init/
   03_seed.sql            -- FICTIONAL test data: sample business, one user per role, income statement history, KPI targets
 ```
 
-`03_seed.sql` uses fixed IDs (business `1000…0001`, unit `2000…0001`, users `3000…0001`–`0003`, submissions `4000…0001`–`0003`) so screens and API tests can refer to the same records. It creates the `pgcrypto` extension to store BCrypt password hashes. All figures are made up; replace them with real participant data only through the app, never in this file.
+`03_seed.sql` uses fixed IDs (business `1000…0001`, unit `2000…0001`, users `3000…0001` to `0003`, submissions `4000…0001` to `0003`) so screens and API tests can refer to the same records. It creates the `pgcrypto` extension to store BCrypt password hashes. All figures are made up; replace them with real participant data only through the app, never in this file.
 
 The scripts only run on an **empty** volume. After changing a script, reset the database:
 
@@ -41,7 +41,7 @@ Every service must use exactly these lowercase strings, or the insert is rejecte
 
 | Table.column | Allowed values |
 |---|---|
-| `business.year_end_month` | `1`–`12` (last month of the financial year; default `2` = February) |
+| `business.year_end_month` | `1` to `12` (last month of the financial year; default `2` = February) |
 | `business_unit.unit_type` | `company` (default; the prototype's one "Whole company" unit), `store`, `branch`, `department` |
 | `app_user.role` | `submitter`, `approver`, `decision_maker` |
 | `app_user.active_status`, `rule_definition.active_status` | `active`, `inactive` |
@@ -49,7 +49,7 @@ Every service must use exactly these lowercase strings, or the insert is rejecte
 | `budget_submission.import_method` | `template`, `mapped_import`, `manual` |
 | `budget_submission.source_scale` | `1`, `1000` (R'000), `1000000` (R million) |
 | `financial_line_item.frequency` | `monthly`, `quarterly`, `annual` (default) |
-| `import_mapping.split_percent` | above 0, up to 100 (rows for one label must add up to 100 — checked by the importer) |
+| `import_mapping.split_percent` | above 0, up to 100 (the importer checks that rows for one label add up to 100) |
 | `approval_action.decision` | `approved`, `rejected` (a rejection must have `comments`) |
 | `data_source.source_type` | `api`, `spreadsheet`, `dataset`, `manual` |
 | `data_source.trusted_status` | `trusted`, `untrusted` |
@@ -62,7 +62,7 @@ Every service must use exactly these lowercase strings, or the insert is rejecte
 
 ## Income statement uploads
 
-**History length:** 3–5 years of annual statements, or at least 24 months of monthly reports. Shorter histories still forecast, with a warning.
+**History length.** 3 to 5 years of annual statements, or at least 24 months of monthly reports. Shorter histories still forecast, with a warning.
 
 - **One upload = one `budget_submission`.** `period_start` / `period_end` span every period in the file (e.g. 5 financial years).
 - **One `financial_line_item` per category per period.** `period_start` is the first day of the month, quarter or financial year (for a February year-end, FY2025 starts `2024-03-01`). Amounts are stored in rands after applying `source_scale`.
@@ -113,7 +113,7 @@ Thresholds are starting values to confirm with the business. Change them in `02_
 - `rule_definition.threshold_value` and `indicator_code` added so rules are configured in the database, not in code.
 - `external_indicator.indicator_code` added (stable code; unique per source and period).
 - New reference tables: `line_category`, `indicator_type`, `indicator_category_link`.
-- New table `import_mapping` (remembered label → category choices per business, with % splits).
+- New table `import_mapping` (each business's saved choices of which category a label maps to, with % splits).
 - `business.year_end_month` added; `business_unit.unit_type` gains `company`.
 - `budget_submission`: `replaces_submission_id`, `import_method`, `source_file_name`, `source_scale` added; status gains `superseded`.
 - `financial_line_item.period_start` added (one row per category per period); `category` is now a foreign key to `line_category`, as is `forecast_value.category`.

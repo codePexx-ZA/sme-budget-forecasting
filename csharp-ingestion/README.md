@@ -1,10 +1,10 @@
-# Budget System — External Data Ingestion Service (C#)
+# Budget system external data ingestion service (C#)
 
 Fetches South African economic indicators from the World Bank and OECD APIs, stores them in PostgreSQL, and raises warning alerts when a value crosses a rule threshold. Also holds `docker-compose.yml` for the whole system.
 
 ## What this does
 
-1. Fetches four South African indicators (annual % change, last 6 years — `IndicatorCatalog.HistoryYears`; each business later uses only the years inside its own income statement history):
+1. Fetches four South African indicators as annual % change for the last 6 years (set by `IndicatorCatalog.HistoryYears`). Later, each business will use only the years inside its own income statement history.
 
    | Code | Indicator | API |
    |---|---|---|
@@ -22,7 +22,7 @@ Fetches South African economic indicators from the World Bank and OECD APIs, sto
 ## Prerequisites
 
 - Docker Desktop (running)
-- .NET SDK 10 — only if you run the API outside Docker with `dotnet run`
+- .NET SDK 10, only if you run the API outside Docker with `dotnet run`
 
 ## 0. One-time setup (passwords are not in the code)
 
