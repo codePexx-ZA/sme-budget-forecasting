@@ -11,7 +11,8 @@ public record IngestResult(
     int IndicatorsSaved,
     int AlertsCreated,
     IReadOnlyList<ExternalIndicator> LatestIndicators,
-    IReadOnlyList<RuleAlert> Alerts
+    IReadOnlyList<RuleAlert> Alerts,
+    string? Error = null
 );
 
 public class IngestionService(
@@ -30,9 +31,20 @@ public class IngestionService(
     {
         var results = new List<IngestResult>();
 
+        // One unreachable source is reported in its own result instead of failing the whole run.
         foreach (var definition in IndicatorCatalog.All)
         {
-            results.Add(await IngestIndicatorAsync(definition, cancellationToken));
+            try
+            {
+                results.Add(await IngestIndicatorAsync(definition, cancellationToken));
+            }
+            catch (Exception error)
+                when (error is HttpRequestException
+                    || (error is TaskCanceledException && !cancellationToken.IsCancellationRequested))
+            {
+                logger.LogWarning(error, "Ingest failed for {Code}.", definition.Code);
+                results.Add(new IngestResult(definition.Code, string.Empty, 0, 0, [], [], error.Message));
+            }
         }
 
         return results;

@@ -89,7 +89,7 @@ docker compose up -d --build
 | Python forecasting API | http://localhost:5090/docs | `http://10.0.2.2:5090` |
 | PostgreSQL | localhost:5432, database `budget_prototype`, user `budget` | Not reachable |
 
-The emulator cannot reach `localhost` on your PC, so use `10.0.2.2` instead. Android also blocks plain `http://` by default. For local development, add `android:usesCleartextTraffic="true"` to the `<application>` tag in `AndroidManifest.xml`.
+All three ports are bound to `127.0.0.1`, so other devices on your network (including a real phone) cannot reach them; only your PC and the emulator can. The emulator cannot reach `localhost` on your PC, so use `10.0.2.2` instead. Android also blocks plain `http://` by default. For local development, add `android:usesCleartextTraffic="true"` to the `<application>` tag in `AndroidManifest.xml`.
 
 `docker compose stop` stops the containers and keeps the data. `docker compose down -v` **deletes** the database, and Docker rebuilds it from `database/init/` on the next start. Run it once after pulling `03_seed.sql` to load the sample data.
 

@@ -5,9 +5,11 @@ from collections import defaultdict
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import date
+from typing import Literal
 
 import psycopg
 from psycopg.types.json import Jsonb
+from pydantic import BaseModel, Field
 
 from app import algorithms
 
@@ -23,13 +25,12 @@ class ForecastError(Exception):
     pass
 
 
-@dataclass
-class ForecastRequest:
-    unit_id: str
-    frequency: str = "annual"
-    horizon: int = 1
-    window_size: int = 3
-    alpha: float = 0.5
+class ForecastRequest(BaseModel):
+    unit_id: str = Field(min_length=1, max_length=32)
+    frequency: Literal["annual", "quarterly", "monthly"] = "annual"
+    horizon: int = Field(default=1, ge=1, le=3, description="Number of future periods (1-3)")
+    window_size: int = Field(default=3, ge=2, le=12, description="Moving Average window (annual: 2-3)")
+    alpha: float = Field(default=0.5, gt=0, le=1, description="Exponential Smoothing weight on recent periods")
 
 
 @dataclass
@@ -77,15 +78,18 @@ def load_history(conn: psycopg.Connection, request: ForecastRequest) -> History:
         """,
         (request.unit_id,),
     ).fetchall()
+    return build_series(rows, request.frequency, year_end_month)
 
+
+def build_series(rows: list[dict], frequency: str, year_end_month: int) -> History:
     points: dict[str, dict[date, float]] = defaultdict(dict)
     monthly: dict[tuple[str, date], dict[date, float]] = defaultdict(dict)
 
     for row in rows:
         amount = float(row["amount"])
-        if row["frequency"] == request.frequency:
+        if row["frequency"] == frequency:
             points[row["category"]][row["period_start"]] = amount
-        elif request.frequency == "annual" and row["frequency"] == "monthly":
+        elif frequency == "annual" and row["frequency"] == "monthly":
             fy_start = financial_year_start(row["period_start"], year_end_month)
             monthly[(row["category"], fy_start)][row["period_start"]] = amount
 

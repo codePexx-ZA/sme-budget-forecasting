@@ -2,14 +2,15 @@
 
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Annotated, Any, Literal
+from typing import Annotated, Any
 
 import psycopg
 from fastapi import Depends, FastAPI, HTTPException, Query, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app import forecasting
 from app.db import get_connection
+from app.forecasting import ForecastRequest
 
 app = FastAPI(
     title="Budget Forecasting Service",
@@ -18,14 +19,6 @@ app = FastAPI(
 )
 
 Connection = Annotated[psycopg.Connection, Depends(get_connection)]
-
-
-class ForecastRequestBody(BaseModel):
-    unit_id: str = Field(min_length=1, max_length=32)
-    frequency: Literal["annual", "quarterly", "monthly"] = "annual"
-    horizon: int = Field(default=1, ge=1, le=3, description="Number of future periods (1-3)")
-    window_size: int = Field(default=3, ge=2, le=12, description="Moving Average window (annual: 2-3)")
-    alpha: float = Field(default=0.5, gt=0, le=1, description="Exponential Smoothing weight on recent periods")
 
 
 class ForecastValueOut(BaseModel):
@@ -56,10 +49,10 @@ def health() -> dict[str, str]:
 
 
 @app.post("/api/forecasts", response_model=list[ForecastRunDetail], status_code=201)
-def create_forecast(body: ForecastRequestBody, conn: Connection):
+def create_forecast(body: ForecastRequest, conn: Connection):
     """Runs both methods on the unit's approved history and returns the two saved runs."""
     try:
-        return forecasting.run_forecast(conn, forecasting.ForecastRequest(**body.model_dump()))
+        return forecasting.run_forecast(conn, body)
     except forecasting.ForecastError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error
 

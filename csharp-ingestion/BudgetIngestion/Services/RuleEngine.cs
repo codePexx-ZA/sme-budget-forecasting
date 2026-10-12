@@ -52,30 +52,38 @@ public class RuleEngine(IngestionDbContext db, ILogger<RuleEngine> logger)
         {
             var threshold = rule.ThresholdValue!.Value;
 
-            // Messages already raised for this rule are skipped, so re-running an ingest does not duplicate alerts.
-            var seen = (
-                await db
-                    .RuleAlerts.Where(a => a.RuleId == rule.RuleId)
-                    .Select(a => a.Message)
-                    .ToListAsync(cancellationToken)
-            ).ToHashSet();
+            // One unresolved alert per rule and year: a revised value updates it, a value back under the threshold resolves it.
+            var unresolved = await db
+                .RuleAlerts.Where(a =>
+                    a.RuleId == rule.RuleId && a.ResolutionStatus != ResolutionStatuses.Resolved
+                )
+                .ToListAsync(cancellationToken);
 
             foreach (var indicator in validated)
             {
+                var prefix = $"South Africa {displayName} for {indicator.RelevantPeriod} ";
+                var existing = unresolved.FirstOrDefault(a => a.Message.StartsWith(prefix, StringComparison.Ordinal));
+
                 if (indicator.IndicatorValue <= threshold)
                 {
+                    if (existing is not null)
+                    {
+                        existing.ResolutionStatus = ResolutionStatuses.Resolved;
+                        unresolved.Remove(existing);
+                        logger.LogInformation("Rule alert resolved: {Message}", existing.Message);
+                    }
                     continue;
                 }
 
                 var message = string.Create(
                     CultureInfo.InvariantCulture,
-                    $"South Africa {displayName} for {indicator.RelevantPeriod} "
-                        + $"is {indicator.IndicatorValue:F2}% (threshold {threshold:F1}%). "
+                    $"{prefix}is {indicator.IndicatorValue:F2}% (threshold {threshold:F1}%). "
                         + $"Review forecasts for: {categories}."
                 );
 
-                if (!seen.Add(message))
+                if (existing is not null)
                 {
+                    existing.Message = message;
                     continue;
                 }
 
@@ -89,16 +97,14 @@ public class RuleEngine(IngestionDbContext db, ILogger<RuleEngine> logger)
                 };
 
                 db.RuleAlerts.Add(alert);
+                unresolved.Add(alert);
                 alerts.Add(alert);
 
                 logger.LogInformation("Rule alert created: {Message}", message);
             }
         }
 
-        if (alerts.Count > 0)
-        {
-            await db.SaveChangesAsync(cancellationToken);
-        }
+        await db.SaveChangesAsync(cancellationToken);
 
         return alerts;
     }

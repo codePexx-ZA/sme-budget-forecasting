@@ -24,6 +24,7 @@ public static class AlertSeverities
 public static class ResolutionStatuses
 {
     public const string Open = "open";
+    public const string Resolved = "resolved";
 }
 
 public static class SourceTypes

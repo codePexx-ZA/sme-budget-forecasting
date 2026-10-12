@@ -14,8 +14,8 @@ builder.Services.AddDbContext<IngestionDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-builder.Services.AddHttpClient<WorldBankClient>();
-builder.Services.AddHttpClient<OecdClient>();
+builder.Services.AddHttpClient<WorldBankClient>().ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(20));
+builder.Services.AddHttpClient<OecdClient>().ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(20));
 builder.Services.AddScoped<RuleEngine>();
 builder.Services.AddScoped<IngestionService>();
 

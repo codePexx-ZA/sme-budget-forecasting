@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: budget
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in csharp-ingestion/.env (copy .env.example)}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - budget_pgdata:/var/lib/postgresql/data
       - ../database/init:/docker-entrypoint-initdb.d:ro
@@ -28,8 +28,9 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=budget_prototype;Username=budget;Password=${POSTGRES_PASSWORD}
+    # No login yet: localhost only. Remove ports once java-api joins and calls http://api:8080 internally.
     ports:
-      - "5080:8080"
+      - "127.0.0.1:5080:8080"
     depends_on:
       postgres:
         condition: service_healthy
@@ -40,8 +41,9 @@ services:
     container_name: budget-forecast
     environment:
       DATABASE_URL: postgresql://budget:${POSTGRES_PASSWORD}@postgres:5432/budget_prototype
+    # No login yet: localhost only. Remove ports once java-api joins and calls http://forecast:8000 internally.
     ports:
-      - "5090:8000"
+      - "127.0.0.1:5090:8000"
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,8 +1,8 @@
-# Budget System — Forecasting Service (Python)
+# Budget system forecasting service (Python)
 
-Runs **Moving Average** and **Exponential Smoothing** on a business's approved income statement history and saves the forecasts to PostgreSQL.
+Runs Moving Average and Exponential Smoothing on a business's approved income statement history and saves the forecasts to PostgreSQL.
 
-Approved history (`financial_line_item`) → forecast per category → `forecast_run` + `forecast_value`.
+It reads approved history from `financial_line_item`, forecasts each category, and writes the results to `forecast_run` and `forecast_value`.
 
 ## What it does
 
@@ -13,10 +13,10 @@ Approved history (`financial_line_item`) → forecast per category → `forecast
 
 | Method | Forecast | Parameter |
 |---|---|---|
-| Moving Average | Average of the last `window_size` periods | `window_size` (default 3; annual 2–3) |
+| Moving Average | Average of the last `window_size` periods | `window_size` (default 3; annual 2 or 3) |
 | Exponential Smoothing | Final smoothed level, `S_t = α·x_t + (1 − α)·S_(t−1)`, `S_0 = x_0` | `alpha` (default 0.5; higher = recent periods count more) |
 
-Both forecasts are **flat**: every future period (1–3, `horizon`) gets the same value.
+Both forecasts are flat. Every future period gets the same value, for a `horizon` of 1 to 3 periods.
 
 `adjusted_amount` is left empty here; it is for the C# rule service / management adjustments later.
 
@@ -57,6 +57,12 @@ The examples in `app/algorithms.py` (made-up test data) double as tests:
 docker compose run --rm forecast python -m doctest app/algorithms.py -v
 ```
 
+`tests/` checks the annual roll-up rule (no database needed):
+
+```powershell
+docker compose run --rm -v ../python-forecast/tests:/app/tests forecast sh -c "pip install -q pytest && python -m pytest tests"
+```
+
 ## Tables
 
 Reads `business`, `business_unit`, `budget_submission`, `financial_line_item`, `line_category`. Writes `forecast_run`, `forecast_value`. It does **not** create tables (see `../database/README.md`).
@@ -69,4 +75,5 @@ Reads `business`, `business_unit`, `budget_submission`, `financial_line_item`, `
 | `app/forecasting.py` | Loads approved history, applies the rules above, saves runs |
 | `app/db.py` | Database connection (`DATABASE_URL`) |
 | `app/main.py` | FastAPI endpoints |
+| `tests/test_forecasting.py` | Tests for the annual roll-up rule |
 | `Dockerfile`, `requirements.txt` | Container build and Python packages |
