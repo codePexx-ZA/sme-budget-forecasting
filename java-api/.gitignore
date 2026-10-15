@@ -1,0 +1,8 @@
+# Gradle and IDE output
+.gradle/
+build/
+*.iml
+out/
+
+# Local settings with passwords (copy .env.example to .env)
+.env
