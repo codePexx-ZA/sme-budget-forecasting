@@ -18,6 +18,7 @@ import com.smebudget.app.auth.SessionManager;
 import com.smebudget.app.auth.UserDto;
 import com.smebudget.app.databinding.ActivityHomeBinding;
 import com.smebudget.app.network.ApiClient;
+import com.smebudget.app.submissions.SubmissionListActivity;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -25,7 +26,7 @@ import retrofit2.Response;
 
 /**
  * Home screen after login (Dean). Shows who is logged in and has the logout button.
- * The role-based menu (links to Aiden's and Boitu's screens) is added to menuContainer later.
+ * Budget submissions (Aiden) is linked from menuContainer. Boitu's screens can be added there too.
  */
 public class HomeActivity extends AppCompatActivity {
 
@@ -51,6 +52,8 @@ public class HomeActivity extends AppCompatActivity {
         authApi = ApiClient.create(this, AuthApi.class);
 
         showUser();
+        binding.submissionsButton.setOnClickListener(v ->
+                startActivity(new Intent(this, SubmissionListActivity.class)));
         binding.logoutButton.setOnClickListener(v -> confirmLogout());
         checkSessionStillValid();
     }

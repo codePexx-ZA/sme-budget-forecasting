@@ -26,5 +26,17 @@
             android:name=".home.HomeActivity"
             android:exported="false" />
 
+        <!-- Budget submissions (Aiden). Back returns to the previous screen. -->
+        <activity
+            android:name=".submissions.SubmissionListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".submissions.SubmissionDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".submissions.SubmissionFormActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
     </application>
 </manifest>
