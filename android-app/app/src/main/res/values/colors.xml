@@ -1,0 +1,8 @@
+<resources>
+    <!-- Shared app colours (Dean). Use these instead of hard-coded colours in layouts. -->
+    <color name="brand_primary">#1B5E4A</color>
+    <color name="brand_primary_light">#7FD3B5</color>
+    <color name="brand_on_primary">#FFFFFF</color>
+    <color name="brand_secondary">#3F6375</color>
+    <color name="brand_error">#B3261E</color>
+</resources>
