@@ -17,8 +17,8 @@ public class Business {
     @Column(name = "industry", length = 100)
     private String industry;
 
-    @Column(name = "country", nullable = false, length = 3)
-    private String country = "ZAF";
+    @Column(name = "country", nullable = false, columnDefinition = "CHAR(3)")
+private String country = "ZAF";
 
     @Column(name = "year_end_month", nullable = false)
     private Short yearEndMonth = 2;
