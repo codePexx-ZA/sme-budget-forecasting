@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">SME Budget</string>
+
+    <!-- Login -->
+    <string name="login_title">SME Budget</string>
+    <string name="login_subtitle">Log in to continue</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="log_in">Log in</string>
+    <string name="error_email_required">Email is required.</string>
+    <string name="error_email_invalid">Enter a valid email address.</string>
+    <string name="error_password_required">Password is required.</string>
+    <string name="error_no_connection">Cannot reach the server. Check that the API is running and try again.</string>
+    <string name="error_unexpected">Something went wrong. Please try again.</string>
+    <string name="welcome_toast">Welcome, %1$s</string>
+
+    <!-- Home -->
+    <string name="home_title">Home</string>
+    <string name="home_welcome">Welcome, %1$s</string>
+    <string name="home_role">Logged in as: %1$s</string>
+    <string name="home_menu_placeholder">Your menu will appear here.</string>
+    <string name="log_out">Log out</string>
+    <string name="logout_confirm_title">Log out?</string>
+    <string name="logout_confirm_message">You will need to log in again to use the app.</string>
+    <string name="cancel">Cancel</string>
+    <string name="logged_out">You have been logged out.</string>
+    <string name="session_expired">Your session has expired. Please log in again.</string>
+
+    <!-- Role names, matching app_user.role values -->
+    <string name="role_submitter">Submitter</string>
+    <string name="role_approver">Approver</string>
+    <string name="role_decision_maker">Decision Maker</string>
+</resources>
