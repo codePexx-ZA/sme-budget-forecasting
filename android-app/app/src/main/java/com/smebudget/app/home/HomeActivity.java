@@ -1,8 +1,10 @@
 package com.smebudget.app.home;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,6 +19,7 @@ import com.smebudget.app.auth.Roles;
 import com.smebudget.app.auth.SessionManager;
 import com.smebudget.app.auth.UserDto;
 import com.smebudget.app.databinding.ActivityHomeBinding;
+import com.smebudget.app.databinding.ItemHomeMenuBinding;
 import com.smebudget.app.network.ApiClient;
 import com.smebudget.app.submissions.SubmissionListActivity;
 
@@ -25,8 +28,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Home screen after login (Dean). Shows who is logged in and has the logout button.
- * Budget submissions (Aiden) is linked from menuContainer. Boitu's screens can be added there too.
+ * Home screen after login (Dean). Shows who is logged in, a menu of the screens their role can use,
+ * and the logout button. Home is the first screen of the task, so pressing back here closes the app.
  */
 public class HomeActivity extends AppCompatActivity {
 
@@ -52,8 +55,6 @@ public class HomeActivity extends AppCompatActivity {
         authApi = ApiClient.create(this, AuthApi.class);
 
         showUser();
-        binding.submissionsButton.setOnClickListener(v ->
-                startActivity(new Intent(this, SubmissionListActivity.class)));
         binding.logoutButton.setOnClickListener(v -> confirmLogout());
         checkSessionStillValid();
     }
@@ -62,10 +63,10 @@ public class HomeActivity extends AppCompatActivity {
         binding.welcomeText.setText(getString(R.string.home_welcome, session.getFullName()));
         binding.roleText.setText(getString(R.string.home_role, Roles.label(this, session.getRole())));
         binding.roleHint.setText(roleHintRes());
-        binding.submissionsHint.setText(submissionsHintRes());
+        buildMenu(session.getRole());
     }
 
-    /** What this role is for. Does not change which screens the button opens. */
+    /** What this role is for. The menu below still decides which screens open. */
     private int roleHintRes() {
         String role = session.getRole();
         if (Roles.SUBMITTER.equals(role)) {
@@ -80,18 +81,39 @@ public class HomeActivity extends AppCompatActivity {
         return R.string.home_hint_reader;
     }
 
-    private int submissionsHintRes() {
-        String role = session.getRole();
+    /**
+     * Shows only the screens the user's role may use. The API checks the role again on every request,
+     * so this menu is for convenience, not security.
+     * To add a screen: one addMenuItem(...) line under the right role(s).
+     */
+    private void buildMenu(String role) {
+        binding.menuContainer.removeAllViews();
+
         if (Roles.SUBMITTER.equals(role)) {
-            return R.string.home_submissions_submitter;
+            addMenuItem(R.string.menu_submissions, R.string.menu_submissions_submitter, SubmissionListActivity.class);
+        } else if (Roles.APPROVER.equals(role)) {
+            addMenuItem(R.string.menu_review_submissions, R.string.menu_submissions_approver, SubmissionListActivity.class);
+        } else if (Roles.DECISION_MAKER.equals(role)) {
+            addMenuItem(R.string.menu_submissions, R.string.menu_submissions_decision_maker, SubmissionListActivity.class);
+            // Boitu: add the KPI targets screen and the forecasts and alerts view here.
         }
-        if (Roles.APPROVER.equals(role)) {
-            return R.string.home_submissions_approver;
+
+        if (binding.menuContainer.getChildCount() == 0) {
+            TextView empty = new TextView(this);
+            empty.setText(R.string.home_menu_empty);
+            empty.setTextAppearance(R.style.TextAppearance_Sme_BodyMuted);
+            binding.menuContainer.addView(empty);
         }
-        if (Roles.DECISION_MAKER.equals(role)) {
-            return R.string.home_submissions_decision_maker;
-        }
-        return R.string.home_submissions_reader;
+    }
+
+    private void addMenuItem(@StringRes int title, @StringRes int description, Class<? extends Activity> screen) {
+        ItemHomeMenuBinding item = ItemHomeMenuBinding.inflate(getLayoutInflater(), binding.menuContainer, true);
+        item.menuTitle.setText(title);
+        item.menuDescription.setText(description);
+        item.menuButton.setText(R.string.open_submissions);
+        View.OnClickListener open = v -> startActivity(new Intent(this, screen));
+        item.getRoot().setOnClickListener(open);
+        item.menuButton.setOnClickListener(open);
     }
 
     /** Asks the API whether the saved token still works (it stops working after expiry or an API restart). */

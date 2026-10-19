@@ -19,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 /**
  * Shared security rules for the whole API (owned by Dean; ask before changing).
  *
- * Only POST /api/auth/login is public. Every other endpoint needs the header
+ * Only POST /api/auth/login and POST /api/auth/register are public. Every other endpoint needs the header
  * "Authorization: Bearer &lt;token&gt;" from a successful login. Roles become authorities
  * ROLE_SUBMITTER, ROLE_APPROVER and ROLE_DECISION_MAKER, so a feature can restrict an
  * endpoint with, for example, {@code @PreAuthorize("hasRole('APPROVER')")}.
@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .logout(logout -> logout.disable()) // logout is our own endpoint: POST /api/auth/logout
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(errors -> errors
