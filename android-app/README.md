@@ -4,7 +4,7 @@ The SME Budget mobile app (Java). It talks to the Spring Boot API in `java-api/`
 
 | Package | Owner | What |
 |---|---|---|
-| `auth/` | Dean | Login screen, session storage, logout |
+| `auth/` | Dean | Login and create account screens, session storage, logout |
 | `home/` | Dean | Home screen after login with a menu for each role |
 | `network/` | Dean (shared) | `ApiClient` (Retrofit) and `ApiErrors`. Ask Dean before changing. |
 | `submissions/` | Aiden | Budget submission screens (to add) |
@@ -35,9 +35,11 @@ Hiding a menu option is only for convenience. The API checks the role again on e
 - Feature screens open on top of Home. Their toolbar arrow and the phone's back button both return to the previous screen, and lists reload when you come back.
 - If the session expires on any screen (API returns 401), the app clears it and returns to login.
 
-### Why there is no sign-up screen
+### Create account
 
-Sign-up is optional in the D4 brief. We left it out on purpose: users belong to a business and have a role (submitter, approver, decision maker), and letting anyone create their own account and choose a role such as Approver would be a security risk. Accounts are created by the business (for the prototype, in `database/init/03_seed.sql`).
+"Create account" on the login screen opens a sign-up form (name, email, password, confirm password). The app and the API both check the inputs: a valid email, a password of at least 8 characters with a letter and a number, and matching passwords. An email that is already registered gets "An account with this email already exists." After signing up, the user is logged in and lands on Home.
+
+**New accounts are always Submitters** in the sample business. The API sets the role, not the app, so nobody can make themselves an Approver or Decision Maker by signing up. Those accounts are set up by the business (for the prototype, in `database/init/03_seed.sql`).
 
 ## Run it
 

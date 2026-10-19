@@ -22,6 +22,12 @@
             </intent-filter>
         </activity>
 
+        <!-- Sign-up (Dean). Opens from login; back returns to login. -->
+        <activity
+            android:name=".auth.RegisterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".home.HomeActivity"
             android:exported="false" />

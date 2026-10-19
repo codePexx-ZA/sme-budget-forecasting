@@ -2,16 +2,19 @@ package com.smebudget.api.auth;
 
 import com.smebudget.api.common.MessageResponse;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Login endpoints (Dean).
  *
+ * POST /api/auth/register {fullName, email, password} -> same reply as login (public; creates a submitter)
  * POST /api/auth/login   {email, password} -> {token, expiresAt, user}   (public)
  * POST /api/auth/logout  ends the current session                     (needs token)
  * GET  /api/auth/me      the logged-in user's details                  (needs token)
@@ -24,6 +27,12 @@ public class AuthController {
 
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    public LoginResponse register(@Valid @RequestBody RegisterRequest request) {
+        return authService.register(request);
     }
 
     @PostMapping("/login")
