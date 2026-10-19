@@ -1,0 +1,27 @@
+<resources>
+    <color name="brand_primary">#2F6F5A</color>
+    <color name="brand_primary_light">#9AD9BE</color>
+    <color name="brand_on_primary">#FFFFFF</color>
+    <color name="brand_secondary">#B7D0DC</color>
+    <color name="brand_error">#FFB4AB</color>
+    <color name="color_on_error">#690005</color>
+
+    <color name="surface">#101614</color>
+    <color name="surface_raised">#1B2622</color>
+    <color name="ink">#E7F1EC</color>
+    <color name="ink_muted">#C3D2CB</color>
+    <color name="outline">#3D5248</color>
+    <color name="primary_container">#1A3C32</color>
+    <color name="on_primary_container">#D7EFE4</color>
+
+    <color name="status_draft_bg">#1B2622</color>
+    <color name="status_draft_fg">#E7F1EC</color>
+    <color name="status_waiting_bg">#1A2C36</color>
+    <color name="status_waiting_fg">#D6E8F2</color>
+    <color name="status_approved_bg">#16382C</color>
+    <color name="status_approved_fg">#D7EFE4</color>
+    <color name="status_rejected_bg">#3A2220</color>
+    <color name="status_rejected_fg">#FFDAD6</color>
+    <color name="status_superseded_bg">#2A2824</color>
+    <color name="status_superseded_fg">#E8E2D8</color>
+</resources>

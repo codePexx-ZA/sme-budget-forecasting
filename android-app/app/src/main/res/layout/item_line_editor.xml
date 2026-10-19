@@ -1,88 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="12dp"
-    app:cardElevation="0dp"
-    app:strokeColor="?attr/colorOutline"
-    app:strokeWidth="1dp">
+<!-- One editable budget line. The parent table supplies the column headers. -->
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/bg_table_row"
+    android:divider="@drawable/divider_table"
+    android:gravity="center_vertical"
+    android:showDividers="middle">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/categoryLayout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="148dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="12dp">
+        android:layout_margin="4dp"
+        android:minWidth="148dp"
+        android:hint="@string/category">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/categoryLayout"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/categoryInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/category">
+            android:inputType="none" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/categoryInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none" />
-        </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/linePeriodLayout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="132dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:minWidth="132dp"
+        android:hint="@string/line_period">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/linePeriodLayout"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/linePeriodInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="@string/line_period">
+            android:clickable="true"
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:inputType="none" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/linePeriodInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:cursorVisible="false"
-                android:focusable="false"
-                android:inputType="none" />
-        </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/amountLayout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="132dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:minWidth="132dp"
+        android:hint="@string/amount">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/amountLayout"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/amountInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="@string/amount">
+            android:inputType="numberDecimal|numberSigned" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/amountInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="numberDecimal|numberSigned" />
-        </com.google.android.material.textfield.TextInputLayout>
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/frequencyLayout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="124dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:minWidth="124dp"
+        android:hint="@string/frequency">
 
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/frequencyLayout"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/frequencyInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:hint="@string/frequency">
+            android:inputType="none" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.MaterialAutoCompleteTextView
-                android:id="@+id/frequencyInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/removeButton"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:text="@string/remove_line"
-            android:textColor="?attr/colorError" />
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/removeButton"
+        style="@style/Widget.Sme.Button.DangerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:minWidth="96dp"
+        android:text="@string/remove_line" />
+</TableRow>

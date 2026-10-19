@@ -52,6 +52,19 @@ public class SubmissionListActivity extends AppCompatActivity {
         binding.newButton.setVisibility(submitter ? View.VISIBLE : View.GONE);
         binding.newButton.setOnClickListener(v ->
                 startActivity(new Intent(this, SubmissionFormActivity.class)));
+        binding.roleGuide.setText(listGuideRes());
+    }
+
+    /** Where to tap next. The New submission button stays hidden unless this user is a submitter. */
+    private int listGuideRes() {
+        String role = session.getRole();
+        if (Roles.SUBMITTER.equals(role)) {
+            return R.string.list_guide_submitter;
+        }
+        if (Roles.APPROVER.equals(role)) {
+            return R.string.list_guide_approver;
+        }
+        return R.string.list_guide_reader;
     }
 
     @Override

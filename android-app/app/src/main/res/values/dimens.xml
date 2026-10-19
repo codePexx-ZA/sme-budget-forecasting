@@ -1,0 +1,14 @@
+<resources>
+    <dimen name="space_4">4dp</dimen>
+    <dimen name="space_8">8dp</dimen>
+    <dimen name="space_12">12dp</dimen>
+    <dimen name="space_16">16dp</dimen>
+    <dimen name="space_24">24dp</dimen>
+    <dimen name="space_32">32dp</dimen>
+    <dimen name="screen_padding">24dp</dimen>
+    <dimen name="button_min_height">48dp</dimen>
+    <dimen name="chip_padding_h">10dp</dimen>
+    <dimen name="chip_padding_v">6dp</dimen>
+    <dimen name="card_radius">12dp</dimen>
+    <dimen name="control_radius">8dp</dimen>
+</resources>

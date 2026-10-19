@@ -1,11 +1,13 @@
 package com.smebudget.app.submissions;
 
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,9 +27,12 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * One budget submission (Aiden): its lines, the profit subtotals for each period, and the
- * actions the logged-in role is allowed to take.
+ * One budget submission (Aiden): short facts under the title, the line table with profit
+ * totals, and the actions the logged-in role is allowed to take.
  */
 public class SubmissionDetailActivity extends AppCompatActivity {
 
@@ -111,40 +116,58 @@ public class SubmissionDetailActivity extends AppCompatActivity {
         binding.content.setVisibility(View.VISIBLE);
         binding.loadErrorText.setVisibility(View.GONE);
         binding.errorText.setVisibility(View.GONE);
-        binding.toolbar.setTitle(getString(R.string.period_range,
-                SubmissionText.prettyDate(detail.periodStart), SubmissionText.prettyDate(detail.periodEnd)));
-        binding.statusText.setText(SubmissionText.status(this, detail.status));
+        binding.toolbar.setTitle(R.string.submission_detail_title);
+        binding.toolbar.setSubtitle(null);
         binding.periodText.setText(getString(R.string.period_range,
                 SubmissionText.prettyDate(detail.periodStart), SubmissionText.prettyDate(detail.periodEnd)));
-        binding.submitterText.setText(getString(R.string.submitted_by,
-                detail.submitterName == null ? "" : detail.submitterName));
-        if (detail.submittedAt == null || detail.submittedAt.trim().length() == 0) {
-            binding.submittedAtText.setVisibility(View.GONE);
-        } else {
-            binding.submittedAtText.setVisibility(View.VISIBLE);
-            binding.submittedAtText.setText(getString(R.string.submitted_on, SubmissionText.prettyInstant(detail.submittedAt)));
-        }
-        binding.importText.setText(getString(R.string.import_value,
-                SubmissionText.importMethod(this, detail.importMethod),
-                SubmissionText.scale(this, detail.sourceScale)));
-        showOptional(binding.fileText, detail.sourceFileName, R.string.file_value);
-        String replaces = detail.replacesLabel != null ? detail.replacesLabel : detail.replacesSubmissionId;
-        showOptional(binding.replacesText, replaces, R.string.replaces_value);
+        binding.statusText.setText(SubmissionText.status(this, detail.status));
+        StatusChips.apply(binding.statusText, detail.status);
+        String meaning = SubmissionText.statusMeaning(this, detail.status);
+        binding.statusMeaning.setText(meaning);
+        binding.statusMeaning.setVisibility(meaning.length() == 0 ? View.GONE : View.VISIBLE);
+        String submitter = detail.submitterName == null ? "" : detail.submitterName;
+        binding.submitterText.setText(getString(R.string.submitted_by, submitter));
+        binding.nextStepText.setText(nextStep(detail));
         showLines(detail);
         showApprovals(detail);
         showActions(detail);
     }
 
-    private void showOptional(TextView view, String value, int template) {
-        if (value == null || value.trim().length() == 0) {
-            view.setVisibility(View.GONE);
-        } else {
-            view.setVisibility(View.VISIBLE);
-            view.setText(getString(template, value));
+    /** Period order from the lines. Figures stay per period and are not added together. */
+    private List<PeriodTotalsDto> profitRows(SubmissionDetail detail) {
+        List<PeriodTotalsDto> rows = new ArrayList<>();
+        if (detail.totals == null) {
+            return rows;
         }
+        String seen = null;
+        if (detail.lineItems != null) {
+            for (LineItemDto line : detail.lineItems) {
+                if (line.periodStart == null || line.periodStart.equals(seen)) {
+                    continue;
+                }
+                seen = line.periodStart;
+                PeriodTotalsDto totals = totalsFor(detail, line.periodStart);
+                if (totals != null) {
+                    rows.add(totals);
+                }
+            }
+        }
+        for (PeriodTotalsDto candidate : detail.totals) {
+            boolean already = false;
+            for (PeriodTotalsDto row : rows) {
+                if (candidate.periodStart != null && candidate.periodStart.equals(row.periodStart)) {
+                    already = true;
+                    break;
+                }
+            }
+            if (!already) {
+                rows.add(candidate);
+            }
+        }
+        return rows;
     }
 
-    /** Lines are already ordered by period. Subtotals are printed after each period's lines. */
+    /** The review table. Profit totals are the last rows, still one figure per period. */
     private void showLines(SubmissionDetail detail) {
         binding.linesContainer.removeAllViews();
         if (detail.lineItems == null || detail.lineItems.isEmpty()) {
@@ -153,56 +176,89 @@ public class SubmissionDetailActivity extends AppCompatActivity {
             binding.linesContainer.addView(empty);
             return;
         }
-        String currentPeriod = null;
+        TableLayout lines = new TableLayout(this);
+        lines.setStretchAllColumns(true);
+        lines.setShrinkAllColumns(true);
+        lines.addView(tableRow(true, false, 2,
+                getString(R.string.category),
+                getString(R.string.section_period),
+                getString(R.string.amount),
+                getString(R.string.frequency)));
         for (LineItemDto line : detail.lineItems) {
-            if (currentPeriod == null || !currentPeriod.equals(line.periodStart)) {
-                if (currentPeriod != null) {
-                    addTotals(currentPeriod);
-                }
-                currentPeriod = line.periodStart;
-                TextView heading = bodyText();
-                heading.setTypeface(heading.getTypeface(), Typeface.BOLD);
-                heading.setPadding(0, dp(12), 0, dp(4));
-                heading.setText(SubmissionText.prettyDate(currentPeriod));
-                binding.linesContainer.addView(heading);
-            }
-            TextView row = bodyText();
             String name = line.categoryName == null ? line.category : line.categoryName;
-            row.setText(getString(R.string.line_amount, name,
-                    SubmissionText.money(line.amount), SubmissionText.frequency(this, line.frequency)));
-            binding.linesContainer.addView(row);
+            lines.addView(tableRow(false, false, 2,
+                    name,
+                    SubmissionText.prettyDate(line.periodStart),
+                    SubmissionText.money(line.amount),
+                    SubmissionText.frequency(this, line.frequency)));
         }
-        if (currentPeriod != null) {
-            addTotals(currentPeriod);
+        List<PeriodTotalsDto> totals = profitRows(detail);
+        boolean several = totals.size() > 1;
+        for (PeriodTotalsDto row : totals) {
+            String period = several ? SubmissionText.prettyDate(row.periodStart) : "";
+            lines.addView(tableRow(false, true, 2,
+                    getString(R.string.gross_profit),
+                    period,
+                    SubmissionText.money(row.grossProfit),
+                    ""));
+            lines.addView(tableRow(false, true, 2,
+                    getString(R.string.operating_profit),
+                    period,
+                    SubmissionText.money(row.operatingProfit),
+                    ""));
+            lines.addView(tableRow(false, true, 2,
+                    getString(R.string.net_profit),
+                    period,
+                    SubmissionText.money(row.netProfit),
+                    ""));
         }
+        binding.linesContainer.addView(tableFrame(lines));
     }
 
-    private void addTotals(String period) {
-        PeriodTotalsDto totals = null;
-        if (current != null && current.totals != null) {
-            for (PeriodTotalsDto candidate : current.totals) {
-                if (period.equals(candidate.periodStart)) {
-                    totals = candidate;
-                    break;
-                }
+    private PeriodTotalsDto totalsFor(SubmissionDetail detail, String period) {
+        for (PeriodTotalsDto candidate : detail.totals) {
+            if (period.equals(candidate.periodStart)) {
+                return candidate;
             }
         }
-        if (totals == null) {
-            return;
-        }
-        TextView note = bodyText();
-        note.setPadding(0, dp(8), 0, 0);
-        note.setText(R.string.subtotals_note);
-        binding.linesContainer.addView(note);
-        addTotalLine(R.string.gross_profit, totals.grossProfit);
-        addTotalLine(R.string.operating_profit, totals.operatingProfit);
-        addTotalLine(R.string.net_profit, totals.netProfit);
+        return null;
     }
 
-    private void addTotalLine(int label, java.math.BigDecimal amount) {
-        TextView row = bodyText();
-        row.setText(getString(label) + ": " + SubmissionText.money(amount));
-        binding.linesContainer.addView(row);
+    /** endFrom is the first column that holds an amount, so those figures line up on the right. */
+    private TableRow tableRow(boolean header, boolean total, int endFrom, String... cells) {
+        TableRow row = new TableRow(this);
+        row.setBackgroundResource(header || total ? R.drawable.bg_table_header : R.drawable.bg_table_row);
+        row.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
+        row.setDividerDrawable(getDrawable(R.drawable.divider_table));
+        float[] weights = {1.35f, 1.15f, 1.3f, 0.9f};
+        for (int i = 0; i < cells.length; i++) {
+            TextView cell = new TextView(this);
+            cell.setText(cells[i] == null ? "" : cells[i]);
+            if (header || total) {
+                cell.setTextAppearance(R.style.TextAppearance_Sme_Label);
+                cell.setTextColor(getColor(R.color.on_primary_container));
+            } else {
+                cell.setTextAppearance(R.style.TextAppearance_Sme_Body);
+            }
+            int padH = dp(10);
+            int padV = dp(12);
+            cell.setPaddingRelative(padH, padV, padH, padV);
+            boolean amount = !header && i >= endFrom;
+            cell.setGravity(Gravity.CENTER_VERTICAL | (amount ? Gravity.END : Gravity.START));
+            float weight = i < weights.length ? weights[i] : 1f;
+            row.addView(cell, new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, weight));
+        }
+        return row;
+    }
+
+    private TableLayout tableFrame(TableLayout table) {
+        table.setClipToOutline(true);
+        table.setBackgroundResource(R.drawable.bg_table);
+        int edge = dp(1);
+        table.setPadding(edge, edge, edge, edge);
+        table.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        return table;
     }
 
     private void showApprovals(SubmissionDetail detail) {
@@ -237,12 +293,50 @@ public class SubmissionDetailActivity extends AppCompatActivity {
         boolean approver = Roles.APPROVER.equals(session.getRole());
         boolean editable = SubmissionStatus.editable(detail.status);
         boolean waiting = SubmissionStatus.SUBMITTED.equals(detail.status);
-        binding.editButton.setVisibility(submitter && editable ? View.VISIBLE : View.GONE);
-        binding.deleteButton.setVisibility(submitter && editable ? View.VISIBLE : View.GONE);
-        binding.submitButton.setVisibility(submitter && editable ? View.VISIBLE : View.GONE);
-        binding.approveButton.setVisibility(approver && waiting ? View.VISIBLE : View.GONE);
-        binding.rejectButton.setVisibility(approver && waiting ? View.VISIBLE : View.GONE);
+        boolean submitterActions = submitter && editable;
+        boolean approverActions = approver && waiting;
+        binding.editButton.setVisibility(submitterActions ? View.VISIBLE : View.GONE);
+        binding.deleteButton.setVisibility(submitterActions ? View.VISIBLE : View.GONE);
+        binding.submitButton.setVisibility(submitterActions ? View.VISIBLE : View.GONE);
+        binding.approveButton.setVisibility(approverActions ? View.VISIBLE : View.GONE);
+        binding.rejectButton.setVisibility(approverActions ? View.VISIBLE : View.GONE);
+        binding.actionsHeader.setVisibility(submitterActions || approverActions ? View.VISIBLE : View.GONE);
         setActionsEnabled(!actionRunning);
+    }
+
+    /** Explains the next action for this role. It does not show another role's buttons. */
+    private String nextStep(SubmissionDetail detail) {
+        String status = detail.status;
+        boolean submitter = Roles.SUBMITTER.equals(session.getRole());
+        boolean approver = Roles.APPROVER.equals(session.getRole());
+        if (SubmissionStatus.APPROVED.equals(status)) {
+            return getString(R.string.next_approved);
+        }
+        if (SubmissionStatus.SUPERSEDED.equals(status)) {
+            return getString(R.string.next_superseded);
+        }
+        if (submitter && SubmissionStatus.DRAFT.equals(status)) {
+            return getString(R.string.next_submitter_draft);
+        }
+        if (submitter && SubmissionStatus.REJECTED.equals(status)) {
+            return getString(R.string.next_submitter_rejected);
+        }
+        if (submitter && SubmissionStatus.SUBMITTED.equals(status)) {
+            return getString(R.string.next_submitter_waiting);
+        }
+        if (approver && SubmissionStatus.SUBMITTED.equals(status)) {
+            return getString(R.string.next_approver_waiting);
+        }
+        if (approver) {
+            return getString(R.string.next_approver_idle);
+        }
+        if (submitter) {
+            return getString(R.string.next_submitter_idle);
+        }
+        if (SubmissionStatus.SUBMITTED.equals(status)) {
+            return getString(R.string.next_reader_waiting);
+        }
+        return getString(R.string.next_reader);
     }
 
     private void setActionsEnabled(boolean enabled) {
@@ -402,6 +496,8 @@ public class SubmissionDetailActivity extends AppCompatActivity {
         TextView view = new TextView(this);
         view.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        view.setTextAppearance(R.style.TextAppearance_Sme_Body);
+        view.setPadding(0, dp(2), 0, dp(2));
         return view;
     }
 

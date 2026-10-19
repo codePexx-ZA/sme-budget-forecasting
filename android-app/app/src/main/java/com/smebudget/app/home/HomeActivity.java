@@ -62,7 +62,23 @@ public class HomeActivity extends AppCompatActivity {
     private void showUser() {
         binding.welcomeText.setText(getString(R.string.home_welcome, session.getFullName()));
         binding.roleText.setText(getString(R.string.home_role, Roles.label(this, session.getRole())));
+        binding.roleHint.setText(roleHintRes());
         buildMenu(session.getRole());
+    }
+
+    /** What this role is for. The menu below still decides which screens open. */
+    private int roleHintRes() {
+        String role = session.getRole();
+        if (Roles.SUBMITTER.equals(role)) {
+            return R.string.home_hint_submitter;
+        }
+        if (Roles.APPROVER.equals(role)) {
+            return R.string.home_hint_approver;
+        }
+        if (Roles.DECISION_MAKER.equals(role)) {
+            return R.string.home_hint_decision_maker;
+        }
+        return R.string.home_hint_reader;
     }
 
     /**
@@ -85,6 +101,7 @@ public class HomeActivity extends AppCompatActivity {
         if (binding.menuContainer.getChildCount() == 0) {
             TextView empty = new TextView(this);
             empty.setText(R.string.home_menu_empty);
+            empty.setTextAppearance(R.style.TextAppearance_Sme_BodyMuted);
             binding.menuContainer.addView(empty);
         }
     }
@@ -93,7 +110,10 @@ public class HomeActivity extends AppCompatActivity {
         ItemHomeMenuBinding item = ItemHomeMenuBinding.inflate(getLayoutInflater(), binding.menuContainer, true);
         item.menuTitle.setText(title);
         item.menuDescription.setText(description);
-        item.getRoot().setOnClickListener(v -> startActivity(new Intent(this, screen)));
+        item.menuButton.setText(R.string.open_submissions);
+        View.OnClickListener open = v -> startActivity(new Intent(this, screen));
+        item.getRoot().setOnClickListener(open);
+        item.menuButton.setOnClickListener(open);
     }
 
     /** Asks the API whether the saved token still works (it stops working after expiry or an API restart). */

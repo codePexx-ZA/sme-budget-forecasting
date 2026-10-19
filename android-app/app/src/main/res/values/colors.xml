@@ -1,8 +1,29 @@
 <resources>
-    <!-- Shared app colours (Dean). Use these instead of hard-coded colours in layouts. -->
+    <!-- One palette for the whole app. Layouts use these names, not raw hex. -->
     <color name="brand_primary">#1B5E4A</color>
     <color name="brand_primary_light">#7FD3B5</color>
     <color name="brand_on_primary">#FFFFFF</color>
     <color name="brand_secondary">#3F6375</color>
     <color name="brand_error">#B3261E</color>
+    <color name="color_on_error">#FFFFFF</color>
+
+    <color name="surface">#F4F7F5</color>
+    <color name="surface_raised">#FFFFFF</color>
+    <color name="ink">#1A2420</color>
+    <color name="ink_muted">#3E514B</color>
+    <color name="outline">#D0DBD6</color>
+    <color name="primary_container">#D7EFE4</color>
+    <color name="on_primary_container">#0E3A2C</color>
+
+    <!-- Status fills. The word and the border pattern carry the meaning; colour only supports them. -->
+    <color name="status_draft_bg">#FFFFFF</color>
+    <color name="status_draft_fg">#1A2420</color>
+    <color name="status_waiting_bg">#E4EEF3</color>
+    <color name="status_waiting_fg">#1A3340</color>
+    <color name="status_approved_bg">#D7EFE4</color>
+    <color name="status_approved_fg">#0E3A2C</color>
+    <color name="status_rejected_bg">#F8E8E6</color>
+    <color name="status_rejected_fg">#6F1D18</color>
+    <color name="status_superseded_bg">#F4F1EA</color>
+    <color name="status_superseded_fg">#3F382E</color>
 </resources>

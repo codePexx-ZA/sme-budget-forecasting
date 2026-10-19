@@ -3,7 +3,9 @@
 
     <!-- Login -->
     <string name="login_title">SME Budget</string>
-    <string name="login_subtitle">Log in to continue</string>
+    <string name="login_subtitle">Sign in to write a budget or review one that is waiting for approval.</string>
+    <string name="login_help">Use the email and password your organisation gave you.</string>
+    <string name="nav_back">Back</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="log_in">Log in</string>
@@ -32,6 +34,12 @@
     <string name="home_title">Home</string>
     <string name="home_welcome">Welcome, %1$s</string>
     <string name="home_role">Logged in as: %1$s</string>
+    <string name="home_section">Next</string>
+    <string name="home_hint_submitter">You write budgets and send them for approval.</string>
+    <string name="home_hint_approver">You approve or reject budgets that are waiting.</string>
+    <string name="home_hint_decision_maker">You can read budgets and the decisions already recorded. You do not submit or approve them.</string>
+    <string name="home_hint_reader">Open budget submissions to see the budgets for your business unit.</string>
+    <string name="open_submissions">Open budget submissions</string>
     <string name="home_menu_empty">There are no screens for your role yet.</string>
 
     <!-- Home menu: what each role sees (Dean). Titles of feature screens live in each feature's strings file. -->

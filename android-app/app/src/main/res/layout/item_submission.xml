@@ -1,39 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Sme.Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
+    android:layout_marginBottom="@dimen/space_12"
     android:clickable="true"
     android:focusable="true"
-    android:foreground="?attr/selectableItemBackground"
-    app:cardElevation="1dp">
+    android:foreground="?attr/selectableItemBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/space_16">
 
         <TextView
             android:id="@+id/periodText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceTitleMedium" />
+            android:textAppearance="@style/TextAppearance.Sme.Section" />
 
         <TextView
             android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_12"
+            android:textAppearance="@style/Widget.Sme.Status" />
+
+        <TextView
+            android:id="@+id/statusMeaning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            android:textColor="?attr/colorPrimary" />
+            android:layout_marginTop="@dimen/space_8"
+            android:textAppearance="@style/TextAppearance.Sme.BodyMuted" />
 
         <TextView
             android:id="@+id/metaText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textAppearance="?attr/textAppearanceBodySmall" />
+            android:layout_marginTop="@dimen/space_8"
+            android:textAppearance="@style/TextAppearance.Sme.Caption" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

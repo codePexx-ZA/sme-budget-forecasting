@@ -1,6 +1,8 @@
 package com.smebudget.app.submissions;
 
+import android.content.Context;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -63,15 +65,20 @@ public class SubmissionAdapter extends RecyclerView.Adapter<SubmissionAdapter.Ho
         }
 
         void bind(SubmissionSummary item) {
-            binding.periodText.setText(itemView.getContext().getString(
+            Context context = itemView.getContext();
+            binding.periodText.setText(context.getString(
                     R.string.period_range,
                     SubmissionText.prettyDate(item.periodStart),
                     SubmissionText.prettyDate(item.periodEnd)));
-            binding.statusText.setText(SubmissionText.status(itemView.getContext(), item.status));
-            binding.metaText.setText(itemView.getContext().getString(
+            binding.statusText.setText(SubmissionText.status(context, item.status));
+            StatusChips.apply(binding.statusText, item.status);
+            String meaning = SubmissionText.statusMeaning(context, item.status);
+            binding.statusMeaning.setText(meaning);
+            binding.statusMeaning.setVisibility(meaning.length() == 0 ? View.GONE : View.VISIBLE);
+            binding.metaText.setText(context.getString(
                     R.string.line_meta,
                     item.lineItemCount,
-                    SubmissionText.importMethod(itemView.getContext(), item.importMethod)));
+                    SubmissionText.importMethod(context, item.importMethod)));
             itemView.setOnClickListener(v -> listener.onClick(item));
         }
     }
