@@ -112,8 +112,4 @@
     <string name="form_period_help">The budget covers this range. Each line must fall inside it.</string>
     <string name="section_source">Source</string>
     <string name="form_lines_help">Each line needs a category, a period inside the budget, and an amount in rands.</string>
-    <string name="details_heading">Summary</string>
-    <string name="status_label">Status</string>
-    <string name="submitted_by_label">Submitted by</string>
-    <string name="summary_scale">Scale</string>
 </resources>
