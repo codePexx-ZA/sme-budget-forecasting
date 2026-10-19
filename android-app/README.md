@@ -5,7 +5,7 @@ The SME Budget mobile app (Java). It talks to the Spring Boot API in `java-api/`
 | Package | Owner | What |
 |---|---|---|
 | `auth/` | Dean | Login screen, session storage, logout |
-| `home/` | Dean | Home screen after login (role-based menu to come) |
+| `home/` | Dean | Home screen after login with a menu for each role |
 | `network/` | Dean (shared) | `ApiClient` (Retrofit) and `ApiErrors`. Ask Dean before changing. |
 | `submissions/` | Aiden | Budget submission screens (to add) |
 | `targets/` | Boitu | KPI target and forecast screens (to add) |
@@ -16,8 +16,28 @@ The theme and colours in `res/values/themes.xml` and `colors.xml` are shared too
 
 - **Login screen:** checks that the email looks valid and the password isn't empty before calling the API, shows a spinner while waiting, and shows the server's message (e.g. "Incorrect email or password.") or a "cannot reach the server" message if the API is down.
 - **Session:** after login the token and user details are saved in the app's private storage (`SessionManager`); the password is never saved. Next time the app opens, it goes straight to Home.
-- **Home:** shows the user's name and role. On opening it checks with the API that the session is still valid; if not, it returns to login with "Your session has expired."
+- **Home:** shows the user's name, role and a menu of only the screens that role can use (see below). On opening it checks with the API that the session is still valid; if not, it returns to login with "Your session has expired."
 - **Logout:** asks for confirmation, ends the session on the server, clears it on the phone and returns to login. Back can't return to Home afterwards.
+
+### Home menu by role
+
+| Role | Menu |
+|---|---|
+| Submitter | Budget submissions: create, edit and submit income statements |
+| Approver | Review submissions: approve or reject waiting submissions |
+| Decision Maker | Budget submissions (view only). KPI targets and forecasts to be added by Boitu |
+
+Hiding a menu option is only for convenience. The API checks the role again on every request, so a user can't reach another role's actions by other means.
+
+### Navigation and the back button
+
+- Login and Home each start a fresh task. After logging in, back from Home closes the app instead of returning to login. After logging out, back can't reopen Home.
+- Feature screens open on top of Home. Their toolbar arrow and the phone's back button both return to the previous screen, and lists reload when you come back.
+- If the session expires on any screen (API returns 401), the app clears it and returns to login.
+
+### Why there is no sign-up screen
+
+Sign-up is optional in the D4 brief. We left it out on purpose: users belong to a business and have a role (submitter, approver, decision maker), and letting anyone create their own account and choose a role such as Approver would be a security risk. Accounts are created by the business (for the prototype, in `database/init/03_seed.sql`).
 
 ## Run it
 

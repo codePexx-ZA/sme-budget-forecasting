@@ -18,7 +18,13 @@
     <string name="home_title">Home</string>
     <string name="home_welcome">Welcome, %1$s</string>
     <string name="home_role">Logged in as: %1$s</string>
-    <string name="home_menu_placeholder">Your menu will appear here.</string>
+    <string name="home_menu_empty">There are no screens for your role yet.</string>
+
+    <!-- Home menu: what each role sees (Dean). Titles of feature screens live in each feature's strings file. -->
+    <string name="menu_review_submissions">Review submissions</string>
+    <string name="menu_submissions_submitter">Create, edit and submit your income statements for approval.</string>
+    <string name="menu_submissions_approver">Approve or reject submissions that are waiting for you.</string>
+    <string name="menu_submissions_decision_maker">View submitted and approved income statements and their totals.</string>
     <string name="log_out">Log out</string>
     <string name="logout_confirm_title">Log out?</string>
     <string name="logout_confirm_message">You will need to log in again to use the app.</string>
