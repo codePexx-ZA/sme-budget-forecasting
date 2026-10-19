@@ -27,9 +27,13 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * One budget submission (Aiden): its lines, the profit subtotals for each period, and the
- * actions the logged-in role is allowed to take.
+ * One budget submission (Aiden): a summary table, the line items, and the actions the
+ * logged-in role is allowed to take.
  */
 public class SubmissionDetailActivity extends AppCompatActivity {
 
@@ -122,37 +126,98 @@ public class SubmissionDetailActivity extends AppCompatActivity {
         binding.statusMeaning.setText(meaning);
         binding.statusMeaning.setVisibility(meaning.length() == 0 ? View.GONE : View.VISIBLE);
         binding.nextStepText.setText(nextStep(detail));
-        binding.periodText.setText(getString(R.string.period_range,
-                SubmissionText.prettyDate(detail.periodStart), SubmissionText.prettyDate(detail.periodEnd)));
-        binding.submitterText.setText(getString(R.string.submitted_by,
-                detail.submitterName == null ? "" : detail.submitterName));
-        if (detail.submittedAt == null || detail.submittedAt.trim().length() == 0) {
-            binding.submittedAtText.setVisibility(View.GONE);
-        } else {
-            binding.submittedAtText.setVisibility(View.VISIBLE);
-            binding.submittedAtText.setText(getString(R.string.submitted_on, SubmissionText.prettyInstant(detail.submittedAt)));
-        }
-        binding.importText.setText(getString(R.string.import_value,
-                SubmissionText.importMethod(this, detail.importMethod),
-                SubmissionText.scale(this, detail.sourceScale)));
-        showOptional(binding.fileText, detail.sourceFileName, R.string.file_value);
-        String replaces = detail.replacesLabel != null ? detail.replacesLabel : detail.replacesSubmissionId;
-        showOptional(binding.replacesText, replaces, R.string.replaces_value);
+        showSummary(detail);
         showLines(detail);
         showApprovals(detail);
         showActions(detail);
     }
 
-    private void showOptional(TextView view, String value, int template) {
-        if (value == null || value.trim().length() == 0) {
-            view.setVisibility(View.GONE);
-        } else {
-            view.setVisibility(View.VISIBLE);
-            view.setText(getString(template, value));
-        }
+    /** Label and value. Profit stays per period, so several periods are listed and not added together. */
+    private void showSummary(SubmissionDetail detail) {
+        binding.summaryContainer.removeAllViews();
+        TableLayout table = new TableLayout(this);
+        table.setStretchAllColumns(true);
+        table.setShrinkAllColumns(true);
+        table.addView(summaryRow(getString(R.string.section_period), getString(R.string.period_range,
+                SubmissionText.prettyDate(detail.periodStart), SubmissionText.prettyDate(detail.periodEnd)), false));
+        table.addView(summaryRow(getString(R.string.status_label), SubmissionText.status(this, detail.status), false));
+        String submitter = detail.submitterName == null ? "" : detail.submitterName;
+        table.addView(summaryRow(getString(R.string.submitted_by_label), submitter, false));
+        table.addView(summaryRow(getString(R.string.import_method),
+                SubmissionText.importMethod(this, detail.importMethod), false));
+        table.addView(summaryRow(getString(R.string.summary_scale),
+                SubmissionText.scale(this, detail.sourceScale), false));
+        table.addView(summaryRow(getString(R.string.gross_profit), profitValue(detail, 0), true));
+        table.addView(summaryRow(getString(R.string.operating_profit), profitValue(detail, 1), true));
+        table.addView(summaryRow(getString(R.string.net_profit), profitValue(detail, 2), true));
+        binding.summaryContainer.addView(tableFrame(table));
     }
 
-    /** Lines stay in period order. Totals for those periods sit in a second table. */
+    /** One amount when the budget has one period. Otherwise each period keeps its own figure. */
+    private String profitValue(SubmissionDetail detail, int field) {
+        List<PeriodTotalsDto> rows = profitRows(detail);
+        if (rows.isEmpty()) {
+            return "";
+        }
+        if (rows.size() == 1) {
+            return SubmissionText.money(profitAmount(rows.get(0), field));
+        }
+        StringBuilder text = new StringBuilder();
+        for (PeriodTotalsDto row : rows) {
+            if (text.length() > 0) {
+                text.append('\n');
+            }
+            text.append(SubmissionText.prettyDate(row.periodStart));
+            text.append('\n');
+            text.append(SubmissionText.money(profitAmount(row, field)));
+        }
+        return text.toString();
+    }
+
+    private List<PeriodTotalsDto> profitRows(SubmissionDetail detail) {
+        List<PeriodTotalsDto> rows = new ArrayList<>();
+        if (detail.totals == null) {
+            return rows;
+        }
+        String seen = null;
+        if (detail.lineItems != null) {
+            for (LineItemDto line : detail.lineItems) {
+                if (line.periodStart == null || line.periodStart.equals(seen)) {
+                    continue;
+                }
+                seen = line.periodStart;
+                PeriodTotalsDto totals = totalsFor(detail, line.periodStart);
+                if (totals != null) {
+                    rows.add(totals);
+                }
+            }
+        }
+        for (PeriodTotalsDto candidate : detail.totals) {
+            boolean already = false;
+            for (PeriodTotalsDto row : rows) {
+                if (candidate.periodStart != null && candidate.periodStart.equals(row.periodStart)) {
+                    already = true;
+                    break;
+                }
+            }
+            if (!already) {
+                rows.add(candidate);
+            }
+        }
+        return rows;
+    }
+
+    private BigDecimal profitAmount(PeriodTotalsDto totals, int field) {
+        if (field == 0) {
+            return totals.grossProfit;
+        }
+        if (field == 1) {
+            return totals.operatingProfit;
+        }
+        return totals.netProfit;
+    }
+
+    /** Lines stay in period order. Profit figures are in the summary table. */
     private void showLines(SubmissionDetail detail) {
         binding.linesContainer.removeAllViews();
         if (detail.lineItems == null || detail.lineItems.isEmpty()) {
@@ -178,51 +243,6 @@ public class SubmissionDetailActivity extends AppCompatActivity {
                     SubmissionText.frequency(this, line.frequency)));
         }
         binding.linesContainer.addView(tableFrame(lines));
-
-        TableLayout totals = totalsTable(detail);
-        if (totals == null) {
-            return;
-        }
-        TextView note = bodyText();
-        note.setTextAppearance(R.style.TextAppearance_Sme_Caption);
-        note.setPadding(0, dp(16), 0, dp(8));
-        note.setText(R.string.subtotals_note);
-        binding.linesContainer.addView(note);
-        binding.linesContainer.addView(tableFrame(totals));
-    }
-
-    /** One row per period that has totals. Period stays in the table so figures are not merged. */
-    private TableLayout totalsTable(SubmissionDetail detail) {
-        if (detail.totals == null || detail.totals.isEmpty() || detail.lineItems == null) {
-            return null;
-        }
-        TableLayout table = new TableLayout(this);
-        table.setStretchAllColumns(true);
-        table.setShrinkAllColumns(true);
-        table.addView(tableRow(true, 1,
-                getString(R.string.section_period),
-                getString(R.string.gross_profit),
-                getString(R.string.operating_profit),
-                getString(R.string.net_profit)));
-        boolean any = false;
-        String seen = null;
-        for (LineItemDto line : detail.lineItems) {
-            if (line.periodStart == null || line.periodStart.equals(seen)) {
-                continue;
-            }
-            seen = line.periodStart;
-            PeriodTotalsDto totals = totalsFor(detail, line.periodStart);
-            if (totals == null) {
-                continue;
-            }
-            any = true;
-            table.addView(tableRow(false, 1,
-                    SubmissionText.prettyDate(line.periodStart),
-                    SubmissionText.money(totals.grossProfit),
-                    SubmissionText.money(totals.operatingProfit),
-                    SubmissionText.money(totals.netProfit)));
-        }
-        return any ? table : null;
     }
 
     private PeriodTotalsDto totalsFor(SubmissionDetail detail, String period) {
@@ -256,6 +276,33 @@ public class SubmissionDetailActivity extends AppCompatActivity {
             cell.setGravity(Gravity.CENTER_VERTICAL | (amount ? Gravity.END : Gravity.START));
             row.addView(cell);
         }
+        return row;
+    }
+
+    private TableRow summaryRow(String label, String value, boolean money) {
+        TableRow row = new TableRow(this);
+        row.setBackgroundResource(R.drawable.bg_table_row);
+        row.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
+        row.setDividerDrawable(getDrawable(R.drawable.divider_table));
+        int padH = dp(8);
+        int padV = dp(10);
+
+        TextView labelView = new TextView(this);
+        labelView.setText(label);
+        labelView.setTextAppearance(R.style.TextAppearance_Sme_Label);
+        labelView.setTextColor(getColor(R.color.on_primary_container));
+        labelView.setBackgroundResource(R.drawable.bg_table_header);
+        labelView.setPaddingRelative(padH, padV, padH, padV);
+        labelView.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
+
+        TextView valueView = new TextView(this);
+        valueView.setText(value == null ? "" : value);
+        valueView.setTextAppearance(R.style.TextAppearance_Sme_Table);
+        valueView.setPaddingRelative(padH, padV, padH, padV);
+        valueView.setGravity(Gravity.CENTER_VERTICAL | (money ? Gravity.END : Gravity.START));
+
+        row.addView(labelView);
+        row.addView(valueView);
         return row;
     }
 
