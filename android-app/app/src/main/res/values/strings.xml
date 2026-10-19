@@ -13,12 +13,32 @@
     <string name="error_no_connection">Cannot reach the server. Check that the API is running and try again.</string>
     <string name="error_unexpected">Something went wrong. Please try again.</string>
     <string name="welcome_toast">Welcome, %1$s</string>
+    <string name="no_account">No account yet?</string>
+    <string name="create_account">Create account</string>
+
+    <!-- Create account -->
+    <string name="register_title">Create account</string>
+    <string name="register_subtitle">New accounts can create and submit budgets. Ask your manager if you need approver access.</string>
+    <string name="full_name">Full name</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="password_rules">At least 8 characters, with a letter and a number.</string>
+    <string name="error_name_required">Full name is required.</string>
+    <string name="error_password_short">Password must be at least 8 characters.</string>
+    <string name="error_password_letter_number">Password must contain at least one letter and one number.</string>
+    <string name="error_password_mismatch">Passwords do not match.</string>
+    <string name="account_created">Account created. Welcome, %1$s</string>
 
     <!-- Home -->
     <string name="home_title">Home</string>
     <string name="home_welcome">Welcome, %1$s</string>
     <string name="home_role">Logged in as: %1$s</string>
-    <string name="home_menu_placeholder">Your menu will appear here.</string>
+    <string name="home_menu_empty">There are no screens for your role yet.</string>
+
+    <!-- Home menu: what each role sees (Dean). Titles of feature screens live in each feature's strings file. -->
+    <string name="menu_review_submissions">Review submissions</string>
+    <string name="menu_submissions_submitter">Create, edit and submit your income statements for approval.</string>
+    <string name="menu_submissions_approver">Approve or reject submissions that are waiting for you.</string>
+    <string name="menu_submissions_decision_maker">View submitted and approved income statements and their totals.</string>
     <string name="log_out">Log out</string>
     <string name="logout_confirm_title">Log out?</string>
     <string name="logout_confirm_message">You will need to log in again to use the app.</string>

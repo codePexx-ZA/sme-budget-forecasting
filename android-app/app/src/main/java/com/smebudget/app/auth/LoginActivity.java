@@ -23,7 +23,7 @@ import retrofit2.Response;
 
 /**
  * Login screen (Dean). Checks the fields, calls POST /api/auth/login, saves the session and opens Home.
- * If a session is already saved, it goes straight to Home.
+ * If a session is already saved, it goes straight to Home. "Create account" opens RegisterActivity.
  */
 public class LoginActivity extends AppCompatActivity {
 
@@ -45,6 +45,9 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.loginButton.setOnClickListener(v -> attemptLogin());
+        // Create account opens on top of login, so back returns here.
+        binding.createAccountButton.setOnClickListener(v ->
+                startActivity(new Intent(this, RegisterActivity.class)));
         // Pressing "Done" on the keyboard in the password field also logs in.
         binding.passwordInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -116,6 +119,7 @@ public class LoginActivity extends AppCompatActivity {
     private void setLoading(boolean loading) {
         binding.progress.setVisibility(loading ? View.VISIBLE : View.GONE);
         binding.loginButton.setEnabled(!loading);
+        binding.createAccountButton.setEnabled(!loading);
         binding.emailInput.setEnabled(!loading);
         binding.passwordInput.setEnabled(!loading);
     }

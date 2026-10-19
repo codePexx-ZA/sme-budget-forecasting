@@ -4,26 +4,28 @@ The API the Android app talks to. It reads and writes the shared PostgreSQL data
 
 | Package | Owner | What |
 |---|---|---|
-| `auth/` | Dean | Login, logout, current user, session tokens |
+| `auth/` | Dean | Sign-up, login, logout, current user, session tokens |
 | `config/` | Dean (shared) | Security rules. Ask Dean before changing. |
 | `common/` | Dean (shared) | Error handling: every error comes back as `{"message": "..."}` |
 | `submissions/` | Aiden | Budget submissions (to add) |
 | `targets/` | Boitu | KPI targets (to add) |
 
-## Login and logout (Dean)
+## Sign-up, login and logout (Dean)
 
 | Endpoint | Login needed | Body / reply |
 |---|---|---|
+| `POST /api/auth/register` | No | Body `{"fullName", "email", "password"}`. Creates a **submitter** and replies `201` with the same body as login. `409` if the email is taken, `400` if a field breaks the rules |
 | `POST /api/auth/login` | No | Body `{"email": "...", "password": "..."}`. Reply `{"token", "expiresAt", "user": {"userId", "fullName", "email", "role", "unitId"}}` |
 | `POST /api/auth/logout` | Yes | Ends the session; the token stops working. Reply `{"message": "You have been logged out."}` |
 | `GET /api/auth/me` | Yes | The logged-in user's details |
 
 How it works:
 
-- Passwords are checked with BCrypt against `app_user.password_hash`. Plain passwords are never stored or logged.
+- Passwords are stored and checked as BCrypt hashes in `app_user.password_hash`. Plain passwords are never stored or logged.
+- Sign-up rules: valid email, password 8 to 72 characters with at least one letter and one number. The role is always `submitter`, set by the server, and the account joins the business unit in `NEW_ACCOUNT_UNIT_ID` (default: the sample business).
 - A wrong password and an unknown email get the same reply (`401 Incorrect email or password.`), so nobody can find out which emails exist. Inactive users get `403`.
 - A successful login returns a random token. The app sends it on every request as `Authorization: Bearer <token>`. The server remembers tokens in memory for `SESSION_HOURS` (default 8). Logout deletes the token. Restarting the API logs everyone out.
-- Every endpoint except login returns `401 {"message": "Please log in to continue."}` without a valid token.
+- Every endpoint except login and sign-up returns `401 {"message": "Please log in to continue."}` without a valid token.
 
 ## Run it (Windows)
 
