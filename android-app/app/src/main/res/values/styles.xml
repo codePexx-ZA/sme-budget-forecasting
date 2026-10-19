@@ -101,4 +101,18 @@
     <style name="Widget.Sme.Status" parent="TextAppearance.Sme.Label">
         <item name="android:textColor">@color/ink</item>
     </style>
+
+    <style name="TextAppearance.Sme.Table" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/ink</item>
+    </style>
+
+    <style name="Widget.Sme.TableHeader" parent="android:Widget.TextView">
+        <item name="android:textAppearance">@style/TextAppearance.Sme.Label</item>
+        <item name="android:textColor">@color/on_primary_container</item>
+        <item name="android:paddingStart">8dp</item>
+        <item name="android:paddingEnd">8dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
 </resources>

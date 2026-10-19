@@ -2,9 +2,12 @@ package com.smebudget.app.submissions;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -149,7 +152,7 @@ public class SubmissionDetailActivity extends AppCompatActivity {
         }
     }
 
-    /** Lines are already ordered by period. Subtotals are printed after each period's lines. */
+    /** Lines stay in period order. Totals for those periods sit in a second table. */
     private void showLines(SubmissionDetail detail) {
         binding.linesContainer.removeAllViews();
         if (detail.lineItems == null || detail.lineItems.isEmpty()) {
@@ -158,57 +161,112 @@ public class SubmissionDetailActivity extends AppCompatActivity {
             binding.linesContainer.addView(empty);
             return;
         }
-        String currentPeriod = null;
+        TableLayout lines = new TableLayout(this);
+        lines.setStretchAllColumns(true);
+        lines.setShrinkAllColumns(true);
+        lines.addView(tableRow(true, 2,
+                getString(R.string.category),
+                getString(R.string.section_period),
+                getString(R.string.amount),
+                getString(R.string.frequency)));
         for (LineItemDto line : detail.lineItems) {
-            if (currentPeriod == null || !currentPeriod.equals(line.periodStart)) {
-                if (currentPeriod != null) {
-                    addTotals(currentPeriod);
-                }
-                currentPeriod = line.periodStart;
-                TextView heading = bodyText();
-                heading.setTextAppearance(R.style.TextAppearance_Sme_Section);
-                heading.setPadding(0, dp(16), 0, dp(4));
-                heading.setText(SubmissionText.prettyDate(currentPeriod));
-                binding.linesContainer.addView(heading);
-            }
-            TextView row = bodyText();
             String name = line.categoryName == null ? line.category : line.categoryName;
-            row.setText(getString(R.string.line_amount, name,
-                    SubmissionText.money(line.amount), SubmissionText.frequency(this, line.frequency)));
-            binding.linesContainer.addView(row);
+            lines.addView(tableRow(false, 2,
+                    name,
+                    SubmissionText.prettyDate(line.periodStart),
+                    SubmissionText.money(line.amount),
+                    SubmissionText.frequency(this, line.frequency)));
         }
-        if (currentPeriod != null) {
-            addTotals(currentPeriod);
-        }
-    }
+        binding.linesContainer.addView(tableFrame(lines));
 
-    private void addTotals(String period) {
-        PeriodTotalsDto totals = null;
-        if (current != null && current.totals != null) {
-            for (PeriodTotalsDto candidate : current.totals) {
-                if (period.equals(candidate.periodStart)) {
-                    totals = candidate;
-                    break;
-                }
-            }
-        }
+        TableLayout totals = totalsTable(detail);
         if (totals == null) {
             return;
         }
         TextView note = bodyText();
         note.setTextAppearance(R.style.TextAppearance_Sme_Caption);
-        note.setPadding(0, dp(8), 0, 0);
+        note.setPadding(0, dp(16), 0, dp(8));
         note.setText(R.string.subtotals_note);
         binding.linesContainer.addView(note);
-        addTotalLine(R.string.gross_profit, totals.grossProfit);
-        addTotalLine(R.string.operating_profit, totals.operatingProfit);
-        addTotalLine(R.string.net_profit, totals.netProfit);
+        binding.linesContainer.addView(tableFrame(totals));
     }
 
-    private void addTotalLine(int label, java.math.BigDecimal amount) {
-        TextView row = bodyText();
-        row.setText(getString(label) + ": " + SubmissionText.money(amount));
-        binding.linesContainer.addView(row);
+    /** One row per period that has totals. Period stays in the table so figures are not merged. */
+    private TableLayout totalsTable(SubmissionDetail detail) {
+        if (detail.totals == null || detail.totals.isEmpty() || detail.lineItems == null) {
+            return null;
+        }
+        TableLayout table = new TableLayout(this);
+        table.setStretchAllColumns(true);
+        table.setShrinkAllColumns(true);
+        table.addView(tableRow(true, 1,
+                getString(R.string.section_period),
+                getString(R.string.gross_profit),
+                getString(R.string.operating_profit),
+                getString(R.string.net_profit)));
+        boolean any = false;
+        String seen = null;
+        for (LineItemDto line : detail.lineItems) {
+            if (line.periodStart == null || line.periodStart.equals(seen)) {
+                continue;
+            }
+            seen = line.periodStart;
+            PeriodTotalsDto totals = totalsFor(detail, line.periodStart);
+            if (totals == null) {
+                continue;
+            }
+            any = true;
+            table.addView(tableRow(false, 1,
+                    SubmissionText.prettyDate(line.periodStart),
+                    SubmissionText.money(totals.grossProfit),
+                    SubmissionText.money(totals.operatingProfit),
+                    SubmissionText.money(totals.netProfit)));
+        }
+        return any ? table : null;
+    }
+
+    private PeriodTotalsDto totalsFor(SubmissionDetail detail, String period) {
+        for (PeriodTotalsDto candidate : detail.totals) {
+            if (period.equals(candidate.periodStart)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    /** endFrom is the first column that holds an amount, so those figures line up on the right. */
+    private TableRow tableRow(boolean header, int endFrom, String... cells) {
+        TableRow row = new TableRow(this);
+        row.setBackgroundResource(header ? R.drawable.bg_table_header : R.drawable.bg_table_row);
+        row.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
+        row.setDividerDrawable(getDrawable(R.drawable.divider_table));
+        for (int i = 0; i < cells.length; i++) {
+            TextView cell = new TextView(this);
+            cell.setText(cells[i] == null ? "" : cells[i]);
+            if (header) {
+                cell.setTextAppearance(R.style.TextAppearance_Sme_Label);
+                cell.setTextColor(getColor(R.color.on_primary_container));
+            } else {
+                cell.setTextAppearance(R.style.TextAppearance_Sme_Table);
+            }
+            int padH = dp(8);
+            int padV = dp(10);
+            cell.setPaddingRelative(padH, padV, padH, padV);
+            boolean amount = !header && i >= endFrom;
+            cell.setGravity(Gravity.CENTER_VERTICAL | (amount ? Gravity.END : Gravity.START));
+            row.addView(cell);
+        }
+        return row;
+    }
+
+    private TableLayout tableFrame(TableLayout table) {
+        table.setClipToOutline(true);
+        table.setBackgroundResource(R.drawable.bg_table);
+        int edge = dp(1);
+        table.setPadding(edge, edge, edge, edge);
+        table.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        return table;
     }
 
     private void showApprovals(SubmissionDetail detail) {

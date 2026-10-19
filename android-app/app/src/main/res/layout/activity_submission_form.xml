@@ -181,11 +181,65 @@
                     android:text="@string/form_lines_help"
                     android:textAppearance="@style/TextAppearance.Sme.BodyMuted" />
 
-                <LinearLayout
-                    android:id="@+id/linesContainer"
+                <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical" />
+                    android:layout_marginTop="@dimen/space_12"
+                    android:background="@drawable/bg_table"
+                    android:clipToOutline="true"
+                    android:fillViewport="true"
+                    android:padding="1dp"
+                    android:scrollbars="horizontal">
+
+                    <TableLayout
+                        android:id="@+id/linesContainer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:stretchColumns="*">
+
+                        <TableRow
+                            android:id="@+id/lineHeaderRow"
+                            android:background="@drawable/bg_table_header"
+                            android:divider="@drawable/divider_table"
+                            android:showDividers="middle">
+
+                            <TextView
+                                style="@style/Widget.Sme.TableHeader"
+                                android:layout_width="148dp"
+                                android:layout_height="wrap_content"
+                                android:minWidth="148dp"
+                                android:text="@string/category" />
+
+                            <TextView
+                                style="@style/Widget.Sme.TableHeader"
+                                android:layout_width="132dp"
+                                android:layout_height="wrap_content"
+                                android:minWidth="132dp"
+                                android:text="@string/section_period" />
+
+                            <TextView
+                                style="@style/Widget.Sme.TableHeader"
+                                android:layout_width="132dp"
+                                android:layout_height="wrap_content"
+                                android:minWidth="132dp"
+                                android:text="@string/amount" />
+
+                            <TextView
+                                style="@style/Widget.Sme.TableHeader"
+                                android:layout_width="124dp"
+                                android:layout_height="wrap_content"
+                                android:minWidth="124dp"
+                                android:text="@string/frequency" />
+
+                            <TextView
+                                style="@style/Widget.Sme.TableHeader"
+                                android:layout_width="96dp"
+                                android:layout_height="wrap_content"
+                                android:minWidth="96dp"
+                                android:text="@string/remove_line" />
+                        </TableRow>
+                    </TableLayout>
+                </HorizontalScrollView>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/addLineButton"

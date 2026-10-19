@@ -499,8 +499,13 @@ public class SubmissionFormActivity extends AppCompatActivity {
         });
     }
 
+    /** Drops edited rows and leaves the column headings in place. */
     private void clearLines() {
-        binding.linesContainer.removeAllViews();
+        for (int i = binding.linesContainer.getChildCount() - 1; i >= 0; i--) {
+            if (binding.linesContainer.getChildAt(i).getId() != R.id.lineHeaderRow) {
+                binding.linesContainer.removeViewAt(i);
+            }
+        }
         rows.clear();
     }
 
