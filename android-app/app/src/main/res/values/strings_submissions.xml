@@ -82,4 +82,35 @@
     <string name="line_amount">%1$s · %2$s · %3$s</string>
     <string name="decision_line">%1$s by %2$s</string>
     <string name="choose_date">Choose a date</string>
+
+    <string name="list_toolbar_subtitle">All budgets for this business unit</string>
+    <string name="status_key_label">What a status means</string>
+    <string name="status_key">Draft: still being written. Waiting for approval: an approver needs to decide. Approved: kept. Rejected: sent back. Superseded: replaced.</string>
+    <string name="list_guide_submitter">Tap a row to open that budget. New submission starts a draft you can edit and then submit.</string>
+    <string name="list_guide_approver">Tap a row to open that budget. Approve and reject appear only when it is waiting for approval.</string>
+    <string name="list_guide_reader">Tap a row to read that budget. Submit and approve actions are not shown for your role.</string>
+    <string name="status_draft_meaning">Still being written.</string>
+    <string name="status_submitted_meaning">An approver needs to decide.</string>
+    <string name="status_approved_meaning">Kept for the business.</string>
+    <string name="status_rejected_meaning">Sent back to be fixed.</string>
+    <string name="status_superseded_meaning">Replaced by a newer budget.</string>
+    <string name="next_step_label">Next step</string>
+    <string name="next_submitter_draft">Check the figures, then submit this budget for approval. You can edit or delete it until you submit.</string>
+    <string name="next_submitter_rejected">An approver sent this back. Edit the figures, then submit it again. You can also delete it.</string>
+    <string name="next_submitter_waiting">This is with an approver. You cannot edit it unless they send it back.</string>
+    <string name="next_submitter_idle">You can change a budget only while it is a draft or was rejected.</string>
+    <string name="next_approver_waiting">Read the lines below, then approve this budget or reject it with a comment.</string>
+    <string name="next_approver_idle">You can approve or reject a budget only while it is waiting for approval.</string>
+    <string name="next_approved">This budget is approved and kept. There is nothing to submit or decide.</string>
+    <string name="next_superseded">This budget was replaced. Return to the list if you need a newer one.</string>
+    <string name="next_reader_waiting">This budget is waiting for an approver. You can read it here. Approve and reject are not shown for your role.</string>
+    <string name="next_reader">You can read this budget. Submit and approve actions are not shown for your role.</string>
+    <string name="actions_heading">Your actions</string>
+    <string name="form_toolbar_subtitle">Saves a draft</string>
+    <string name="form_intro">This screen saves a draft. Submit it for approval from the budget screen when it is ready.</string>
+    <string name="section_period">Period</string>
+    <string name="form_period_help">The budget covers this range. Each line must fall inside it.</string>
+    <string name="section_source">Source</string>
+    <string name="form_lines_help">Each line needs a category, a period inside the budget, and an amount in rands.</string>
+    <string name="details_heading">Details</string>
 </resources>

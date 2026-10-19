@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Sme.Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="12dp"
-    app:cardElevation="0dp"
-    app:strokeColor="?attr/colorOutline"
-    app:strokeWidth="1dp">
+    android:layout_marginTop="@dimen/space_12">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="@dimen/space_16">
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/categoryLayout"
@@ -33,7 +30,7 @@
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/space_12"
             android:hint="@string/line_period">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -51,7 +48,7 @@
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/space_12"
             android:hint="@string/amount">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -66,7 +63,7 @@
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/space_12"
             android:hint="@string/frequency">
 
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -78,11 +75,11 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/removeButton"
-            style="@style/Widget.Material3.Button.TextButton"
+            style="@style/Widget.Sme.Button.DangerText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:text="@string/remove_line"
-            android:textColor="?attr/colorError" />
+            android:layout_marginTop="@dimen/space_4"
+            android:text="@string/remove_line" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

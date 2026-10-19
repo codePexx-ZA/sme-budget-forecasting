@@ -42,6 +42,22 @@ final class SubmissionText {
         return status == null ? "" : status;
     }
 
+    /** One short sentence for the status word. Empty when the status is not one of the known values. */
+    static String statusMeaning(Context context, String status) {
+        if (SubmissionStatus.DRAFT.equals(status)) {
+            return context.getString(R.string.status_draft_meaning);
+        } else if (SubmissionStatus.SUBMITTED.equals(status)) {
+            return context.getString(R.string.status_submitted_meaning);
+        } else if (SubmissionStatus.APPROVED.equals(status)) {
+            return context.getString(R.string.status_approved_meaning);
+        } else if (SubmissionStatus.REJECTED.equals(status)) {
+            return context.getString(R.string.status_rejected_meaning);
+        } else if (SubmissionStatus.SUPERSEDED.equals(status)) {
+            return context.getString(R.string.status_superseded_meaning);
+        }
+        return "";
+    }
+
     static String frequency(Context context, String frequency) {
         if ("monthly".equals(frequency)) {
             return context.getString(R.string.frequency_monthly);

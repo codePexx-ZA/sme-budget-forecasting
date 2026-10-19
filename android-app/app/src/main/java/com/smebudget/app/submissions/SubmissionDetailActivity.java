@@ -1,7 +1,6 @@
 package com.smebudget.app.submissions;
 
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -113,7 +112,13 @@ public class SubmissionDetailActivity extends AppCompatActivity {
         binding.errorText.setVisibility(View.GONE);
         binding.toolbar.setTitle(getString(R.string.period_range,
                 SubmissionText.prettyDate(detail.periodStart), SubmissionText.prettyDate(detail.periodEnd)));
+        binding.toolbar.setSubtitle(R.string.submission_detail_title);
         binding.statusText.setText(SubmissionText.status(this, detail.status));
+        StatusChips.apply(binding.statusText, detail.status);
+        String meaning = SubmissionText.statusMeaning(this, detail.status);
+        binding.statusMeaning.setText(meaning);
+        binding.statusMeaning.setVisibility(meaning.length() == 0 ? View.GONE : View.VISIBLE);
+        binding.nextStepText.setText(nextStep(detail));
         binding.periodText.setText(getString(R.string.period_range,
                 SubmissionText.prettyDate(detail.periodStart), SubmissionText.prettyDate(detail.periodEnd)));
         binding.submitterText.setText(getString(R.string.submitted_by,
@@ -161,8 +166,8 @@ public class SubmissionDetailActivity extends AppCompatActivity {
                 }
                 currentPeriod = line.periodStart;
                 TextView heading = bodyText();
-                heading.setTypeface(heading.getTypeface(), Typeface.BOLD);
-                heading.setPadding(0, dp(12), 0, dp(4));
+                heading.setTextAppearance(R.style.TextAppearance_Sme_Section);
+                heading.setPadding(0, dp(16), 0, dp(4));
                 heading.setText(SubmissionText.prettyDate(currentPeriod));
                 binding.linesContainer.addView(heading);
             }
@@ -191,6 +196,7 @@ public class SubmissionDetailActivity extends AppCompatActivity {
             return;
         }
         TextView note = bodyText();
+        note.setTextAppearance(R.style.TextAppearance_Sme_Caption);
         note.setPadding(0, dp(8), 0, 0);
         note.setText(R.string.subtotals_note);
         binding.linesContainer.addView(note);
@@ -237,12 +243,50 @@ public class SubmissionDetailActivity extends AppCompatActivity {
         boolean approver = Roles.APPROVER.equals(session.getRole());
         boolean editable = SubmissionStatus.editable(detail.status);
         boolean waiting = SubmissionStatus.SUBMITTED.equals(detail.status);
-        binding.editButton.setVisibility(submitter && editable ? View.VISIBLE : View.GONE);
-        binding.deleteButton.setVisibility(submitter && editable ? View.VISIBLE : View.GONE);
-        binding.submitButton.setVisibility(submitter && editable ? View.VISIBLE : View.GONE);
-        binding.approveButton.setVisibility(approver && waiting ? View.VISIBLE : View.GONE);
-        binding.rejectButton.setVisibility(approver && waiting ? View.VISIBLE : View.GONE);
+        boolean submitterActions = submitter && editable;
+        boolean approverActions = approver && waiting;
+        binding.editButton.setVisibility(submitterActions ? View.VISIBLE : View.GONE);
+        binding.deleteButton.setVisibility(submitterActions ? View.VISIBLE : View.GONE);
+        binding.submitButton.setVisibility(submitterActions ? View.VISIBLE : View.GONE);
+        binding.approveButton.setVisibility(approverActions ? View.VISIBLE : View.GONE);
+        binding.rejectButton.setVisibility(approverActions ? View.VISIBLE : View.GONE);
+        binding.actionsHeader.setVisibility(submitterActions || approverActions ? View.VISIBLE : View.GONE);
         setActionsEnabled(!actionRunning);
+    }
+
+    /** Explains the next action for this role. It does not show another role's buttons. */
+    private String nextStep(SubmissionDetail detail) {
+        String status = detail.status;
+        boolean submitter = Roles.SUBMITTER.equals(session.getRole());
+        boolean approver = Roles.APPROVER.equals(session.getRole());
+        if (SubmissionStatus.APPROVED.equals(status)) {
+            return getString(R.string.next_approved);
+        }
+        if (SubmissionStatus.SUPERSEDED.equals(status)) {
+            return getString(R.string.next_superseded);
+        }
+        if (submitter && SubmissionStatus.DRAFT.equals(status)) {
+            return getString(R.string.next_submitter_draft);
+        }
+        if (submitter && SubmissionStatus.REJECTED.equals(status)) {
+            return getString(R.string.next_submitter_rejected);
+        }
+        if (submitter && SubmissionStatus.SUBMITTED.equals(status)) {
+            return getString(R.string.next_submitter_waiting);
+        }
+        if (approver && SubmissionStatus.SUBMITTED.equals(status)) {
+            return getString(R.string.next_approver_waiting);
+        }
+        if (approver) {
+            return getString(R.string.next_approver_idle);
+        }
+        if (submitter) {
+            return getString(R.string.next_submitter_idle);
+        }
+        if (SubmissionStatus.SUBMITTED.equals(status)) {
+            return getString(R.string.next_reader_waiting);
+        }
+        return getString(R.string.next_reader);
     }
 
     private void setActionsEnabled(boolean enabled) {
@@ -402,6 +446,8 @@ public class SubmissionDetailActivity extends AppCompatActivity {
         TextView view = new TextView(this);
         view.setLayoutParams(new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        view.setTextAppearance(R.style.TextAppearance_Sme_Body);
+        view.setPadding(0, dp(2), 0, dp(2));
         return view;
     }
 

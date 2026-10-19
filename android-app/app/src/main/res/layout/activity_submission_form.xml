@@ -4,17 +4,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/surface"
     android:orientation="vertical">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
+        style="@style/Widget.Sme.Toolbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
+        android:layout_height="wrap_content"
+        app:navigationContentDescription="@string/nav_back"
         app:navigationIcon="?attr/homeAsUpIndicator"
-        app:navigationIconTint="?attr/colorOnPrimary"
-        app:title="@string/submission_new"
-        app:titleTextColor="?attr/colorOnPrimary" />
+        app:subtitle="@string/form_toolbar_subtitle"
+        app:title="@string/submission_new" />
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -25,6 +26,7 @@
             android:id="@+id/formScroll"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:clipToPadding="false"
             android:fillViewport="true"
             android:visibility="gone">
 
@@ -32,13 +34,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="@dimen/screen_padding">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/form_intro"
+                    android:textAppearance="@style/TextAppearance.Sme.Body" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_32"
+                    android:text="@string/section_period"
+                    android:textAppearance="@style/TextAppearance.Sme.Section" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_4"
+                    android:text="@string/form_period_help"
+                    android:textAppearance="@style/TextAppearance.Sme.BodyMuted" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/periodStartLayout"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_16"
                     android:hint="@string/period_start">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -56,7 +79,7 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="@dimen/space_16"
                     android:hint="@string/period_end">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -69,12 +92,19 @@
                         android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_32"
+                    android:text="@string/section_source"
+                    android:textAppearance="@style/TextAppearance.Sme.Section" />
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/importMethodLayout"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="@dimen/space_16"
                     android:hint="@string/import_method">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -89,7 +119,7 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="@dimen/space_16"
                     android:hint="@string/source_scale">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -104,7 +134,7 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="@dimen/space_16"
                     android:hint="@string/source_file">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -120,7 +150,7 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="@dimen/space_16"
                     android:hint="@string/replaces_submission">
 
                     <com.google.android.material.textfield.MaterialAutoCompleteTextView
@@ -133,16 +163,23 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/space_8"
                     android:text="@string/amount_hint"
-                    android:textAppearance="?attr/textAppearanceBodySmall" />
+                    android:textAppearance="@style/TextAppearance.Sme.BodyMuted" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="@dimen/space_32"
                     android:text="@string/line_items"
-                    android:textAppearance="?attr/textAppearanceTitleMedium" />
+                    android:textAppearance="@style/TextAppearance.Sme.Section" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_4"
+                    android:text="@string/form_lines_help"
+                    android:textAppearance="@style/TextAppearance.Sme.BodyMuted" />
 
                 <LinearLayout
                     android:id="@+id/linesContainer"
@@ -152,17 +189,18 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/addLineButton"
-                    style="@style/Widget.Material3.Button.TextButton"
+                    style="@style/Widget.Sme.Button.Text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_8"
                     android:text="@string/add_line" />
 
                 <TextView
                     android:id="@+id/errorText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textColor="?attr/colorError"
+                    android:layout_marginTop="@dimen/space_8"
+                    android:textAppearance="@style/TextAppearance.Sme.Error"
                     android:visibility="gone" />
             </LinearLayout>
         </ScrollView>
@@ -179,16 +217,17 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:padding="24dp"
-            android:textColor="?attr/colorError"
+            android:padding="@dimen/screen_padding"
+            android:textAppearance="@style/TextAppearance.Sme.Error"
             android:visibility="gone" />
     </FrameLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/saveButton"
+        style="@style/Widget.Sme.Button.Primary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_margin="@dimen/screen_padding"
         android:text="@string/save_draft"
         android:visibility="gone" />
 </LinearLayout>

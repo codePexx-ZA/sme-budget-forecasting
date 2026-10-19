@@ -61,6 +61,37 @@ public class HomeActivity extends AppCompatActivity {
     private void showUser() {
         binding.welcomeText.setText(getString(R.string.home_welcome, session.getFullName()));
         binding.roleText.setText(getString(R.string.home_role, Roles.label(this, session.getRole())));
+        binding.roleHint.setText(roleHintRes());
+        binding.submissionsHint.setText(submissionsHintRes());
+    }
+
+    /** What this role is for. Does not change which screens the button opens. */
+    private int roleHintRes() {
+        String role = session.getRole();
+        if (Roles.SUBMITTER.equals(role)) {
+            return R.string.home_hint_submitter;
+        }
+        if (Roles.APPROVER.equals(role)) {
+            return R.string.home_hint_approver;
+        }
+        if (Roles.DECISION_MAKER.equals(role)) {
+            return R.string.home_hint_decision_maker;
+        }
+        return R.string.home_hint_reader;
+    }
+
+    private int submissionsHintRes() {
+        String role = session.getRole();
+        if (Roles.SUBMITTER.equals(role)) {
+            return R.string.home_submissions_submitter;
+        }
+        if (Roles.APPROVER.equals(role)) {
+            return R.string.home_submissions_approver;
+        }
+        if (Roles.DECISION_MAKER.equals(role)) {
+            return R.string.home_submissions_decision_maker;
+        }
+        return R.string.home_submissions_reader;
     }
 
     /** Asks the API whether the saved token still works (it stops working after expiry or an API restart). */
