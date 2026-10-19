@@ -3,6 +3,8 @@ package com.budgetapp.entities;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 
+// This class represents a business in the system and maps to the 'business' table in the database
+// Each business can have multiple business units linked to it
 @Entity
 @Table(name = "business")
 public class Business {

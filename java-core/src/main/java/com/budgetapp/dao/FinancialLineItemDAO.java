@@ -6,6 +6,9 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import java.util.List;
 
+// This class handles all database operations for financial line items
+// It provides methods to create, read, update and delete line item records
+
 public class FinancialLineItemDAO {
 
     private EntityManagerFactory emf;

@@ -2,6 +2,9 @@ package com.budgetapp.entities;
 
 import jakarta.persistence.*;
 
+// This class represents a user in the system and maps to the 'app_user' table in the database
+// Users are assigned one of three roles: submitter, approver or decision_maker
+
 @Entity
 @Table(name = "app_user")
 public class AppUser {

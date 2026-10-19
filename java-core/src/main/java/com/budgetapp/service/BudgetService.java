@@ -7,6 +7,10 @@ import com.budgetapp.entities.FinancialLineItem;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+// This class contains the business logic for managing budget submissions and line items.
+// It validates data before passing it to the DAO layer and enforces workflow rules
+// such as only allowing draft submissions to be deleted or submitted for approval
+
 public class BudgetService {
 
     private BudgetSubmissionDAO submissionDAO;

@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+// This class represents a single financial line item and maps to the 'financial_line_item' table
+// Each line item stores one amount for one category for one period within a submission
+
 @Entity
 @Table(name = "financial_line_item")
 public class FinancialLineItem {

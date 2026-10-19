@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
+// This class represents a budget submission and maps to the 'budget_submission' table in the database.
+// A submission moves through statuses: draft, submitted, approved, rejected or superseded
+
 @Entity
 @Table(name = "budget_submission")
 public class BudgetSubmission {

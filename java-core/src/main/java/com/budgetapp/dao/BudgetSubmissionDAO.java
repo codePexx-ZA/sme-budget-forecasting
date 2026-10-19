@@ -6,6 +6,9 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 import java.util.List;
 
+// This class represents a single financial line item and maps to the 'financial_line_item' table
+// Each line item stores one amount for one category for one period within a submission
+
 public class BudgetSubmissionDAO {
 
     private EntityManagerFactory emf;

@@ -2,6 +2,9 @@ package com.budgetapp.entities;
 
 import jakarta.persistence.*;
 
+// This class represents a business unit and maps to the 'business_unit' table in the database
+// A business unit belongs to a business and can be a company, store, branch or department.
+
 @Entity
 @Table(name = "business_unit")
 public class BusinessUnit {
