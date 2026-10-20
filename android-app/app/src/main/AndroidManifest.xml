@@ -44,5 +44,20 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- KPI targets, forecasts and alerts (Boitu). Back returns to the previous screen. -->
+        <activity
+            android:name=".targets.TargetListActivity"
+            android:exported="false" />
+        <activity
+            android:name=".targets.TargetFormActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".targets.InsightsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".targets.ReportActivity"
+            android:exported="false" />
+
     </application>
 </manifest>

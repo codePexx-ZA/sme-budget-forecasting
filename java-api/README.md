@@ -7,8 +7,8 @@ The API the Android app talks to. It reads and writes the shared PostgreSQL data
 | `auth/` | Dean | Sign-up, login, logout, current user, session tokens |
 | `config/` | Dean (shared) | Security rules. Ask Dean before changing. |
 | `common/` | Dean (shared) | Error handling: every error comes back as `{"message": "..."}` |
-| `submissions/` | Aiden | Budget submissions (to add) |
-| `targets/` | Boitu | KPI targets (to add) |
+| `submissions/` | Aiden | Budget submissions. D4 scope for this package is complete |
+| `targets/` | Boitu | KPI targets, forecasts, alerts and the meeting report. See `team-submissions/boitu/README.md`. D4 scope for this package is complete |
 
 ## Sign-up, login and logout (Dean)
 
