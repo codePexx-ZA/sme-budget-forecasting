@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.Sme.Card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/space_12">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="@dimen/space_16">
+
+        <TextView
+            android:id="@+id/severityText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_status_waiting"
+            android:paddingStart="@dimen/chip_padding_h"
+            android:paddingTop="@dimen/chip_padding_v"
+            android:paddingEnd="@dimen/chip_padding_h"
+            android:paddingBottom="@dimen/chip_padding_v"
+            android:textAppearance="@style/TextAppearance.Sme.Label" />
+
+        <TextView
+            android:id="@+id/messageText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_8"
+            android:textAppearance="@style/TextAppearance.Sme.Body" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

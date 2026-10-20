@@ -106,6 +106,13 @@
         <item name="android:textColor">@color/ink</item>
     </style>
 
+    <style name="Widget.Sme.SectionHeading" parent="android:Widget.TextView">
+        <item name="android:textAppearance">@style/TextAppearance.Sme.Label</item>
+        <item name="android:textColor">@color/brand_primary</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.06</item>
+    </style>
+
     <style name="Widget.Sme.TableHeader" parent="android:Widget.TextView">
         <item name="android:textAppearance">@style/TextAppearance.Sme.Label</item>
         <item name="android:textColor">@color/on_primary_container</item>

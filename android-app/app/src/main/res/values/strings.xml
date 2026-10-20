@@ -37,7 +37,7 @@
     <string name="home_section">Next</string>
     <string name="home_hint_submitter">You write budgets and send them for approval.</string>
     <string name="home_hint_approver">You approve or reject budgets that are waiting.</string>
-    <string name="home_hint_decision_maker">You can read budgets and the decisions already recorded. You do not submit or approve them.</string>
+    <string name="home_hint_decision_maker">You set KPI targets and compare forecasts with economic warnings. You do not submit or approve budgets.</string>
     <string name="home_hint_reader">Open budget submissions to see the budgets for your business unit.</string>
     <string name="open_submissions">Open budget submissions</string>
     <string name="home_menu_empty">There are no screens for your role yet.</string>

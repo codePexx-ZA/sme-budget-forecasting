@@ -22,6 +22,9 @@ import com.smebudget.app.databinding.ActivityHomeBinding;
 import com.smebudget.app.databinding.ItemHomeMenuBinding;
 import com.smebudget.app.network.ApiClient;
 import com.smebudget.app.submissions.SubmissionListActivity;
+import com.smebudget.app.targets.InsightsActivity;
+import com.smebudget.app.targets.ReportActivity;
+import com.smebudget.app.targets.TargetListActivity;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -90,12 +93,20 @@ public class HomeActivity extends AppCompatActivity {
         binding.menuContainer.removeAllViews();
 
         if (Roles.SUBMITTER.equals(role)) {
-            addMenuItem(R.string.menu_submissions, R.string.menu_submissions_submitter, SubmissionListActivity.class);
+            addMenuItem(R.string.menu_submissions, R.string.menu_submissions_submitter,
+                    SubmissionListActivity.class, R.string.open_submissions);
         } else if (Roles.APPROVER.equals(role)) {
-            addMenuItem(R.string.menu_review_submissions, R.string.menu_submissions_approver, SubmissionListActivity.class);
+            addMenuItem(R.string.menu_review_submissions, R.string.menu_submissions_approver,
+                    SubmissionListActivity.class, R.string.open_submissions);
         } else if (Roles.DECISION_MAKER.equals(role)) {
-            addMenuItem(R.string.menu_submissions, R.string.menu_submissions_decision_maker, SubmissionListActivity.class);
-            // Boitu: add the KPI targets screen and the forecasts and alerts view here.
+            addMenuItem(R.string.menu_report, R.string.menu_report_decision,
+                    ReportActivity.class, R.string.open_report);
+            addMenuItem(R.string.menu_submissions, R.string.menu_submissions_decision_maker,
+                    SubmissionListActivity.class, R.string.open_submissions);
+            addMenuItem(R.string.menu_targets, R.string.menu_targets_decision,
+                    TargetListActivity.class, R.string.open_targets);
+            addMenuItem(R.string.menu_insights, R.string.menu_insights_decision,
+                    InsightsActivity.class, R.string.open_insights);
         }
 
         if (binding.menuContainer.getChildCount() == 0) {
@@ -106,11 +117,12 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void addMenuItem(@StringRes int title, @StringRes int description, Class<? extends Activity> screen) {
+    private void addMenuItem(@StringRes int title, @StringRes int description,
+                             Class<? extends Activity> screen, @StringRes int buttonText) {
         ItemHomeMenuBinding item = ItemHomeMenuBinding.inflate(getLayoutInflater(), binding.menuContainer, true);
         item.menuTitle.setText(title);
         item.menuDescription.setText(description);
-        item.menuButton.setText(R.string.open_submissions);
+        item.menuButton.setText(buttonText);
         View.OnClickListener open = v -> startActivity(new Intent(this, screen));
         item.getRoot().setOnClickListener(open);
         item.menuButton.setOnClickListener(open);

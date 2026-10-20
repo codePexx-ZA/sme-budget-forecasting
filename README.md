@@ -40,10 +40,10 @@ Each member does about 25% of the work. Each Java member owns one feature end to
 
 | Member | Owns for D4 | Brief sections |
 |---|---|---|
-| **Liam** | Database, sample data, C# external data service, Python forecasting service, Docker (done). Next: Spring Boot in Docker Compose, connecting the app to the forecast and alerts APIs, pull request reviews, final build | 3, 7, integration |
+| **Liam** | Database, sample data, C# external data service, Python forecasting service, Docker (done). The app already reaches forecasts and alerts through `java-api/`. Next: Spring Boot in Docker Compose, pull request reviews, final build | 3, 7, integration |
 | **Dean** | Login and app structure: login, logout and register screens, Spring Boot login endpoints (BCrypt passwords, token or session), role-based home menu, navigation and back stack, shared theme and styles | 1, 2, 5 |
 | **Aiden** | CRUD module 1, budget submissions: create, view, edit and delete submissions and their line items; submit, approve and reject; screens and Spring Boot endpoints | 3, 4, 6 |
-| **Boitu** | CRUD module 2, KPI targets and the Decision Maker view: create, view, edit and delete KPI targets; a screen showing forecasts (Python API) and alerts (C# API) | 3, 4, 6 |
+| **Boitu** | CRUD module 2, KPI targets and the Decision Maker view: create, view, edit and delete KPI targets; forecasts and alerts; a meeting report the decision maker can email from the phone | 3, 4, 6 |
 
 Everyone handles UI feedback (messages, validation, loading) and comments in their own screens and code.
 
@@ -55,11 +55,32 @@ Everyone handles UI feedback (messages, validation, loading) and comments in the
 | Sample test data | `database/init/03_seed.sql` | SQL | Liam | Done |
 | External data and warning rules | `csharp-ingestion/` | C# .NET 10 | Liam | Done |
 | Forecasting (MA and ES) | `python-forecast/` | Python FastAPI | Liam | Done (runs on sample data) |
-| Login, roles, navigation | `android-app/`, `java-api/` | Android (Java), Spring Boot | Dean | To do |
-| Budget submissions CRUD and approval | `android-app/`, `java-api/` | Android (Java), Spring Boot | Aiden | To do |
-| KPI targets CRUD, forecasts and alerts view | `android-app/`, `java-api/` | Android (Java), Spring Boot | Boitu | To do |
-| Spring Boot in Docker Compose | `csharp-ingestion/docker-compose.yml` | Docker | Liam | When `java-api/` exists |
+| Login, roles, navigation | `android-app/`, `java-api/` | Android (Java), Spring Boot | Dean | Done |
+| Budget submissions CRUD and approval | `android-app/`, `java-api/` | Android (Java), Spring Boot | Aiden | Done |
+| KPI targets CRUD, forecasts and alerts view | `android-app/`, `java-api/` | Android (Java), Spring Boot | Boitu | Done |
+| Meeting report (grouped view, share by the phone's mail app) | `android-app/`, `java-api/` `targets/` | Android (Java), Spring Boot | Boitu | Done |
+| Spring Boot in Docker Compose | `csharp-ingestion/docker-compose.yml` | Docker | Liam | Not started. `java-api/` exists |
 | Excel income statement importer | `csharp-ingestion/` | C# | Liam | After D4 (not required) |
+
+## Where work stopped (20 Oct 2026)
+
+Paused overnight. Continue in a new session from this section. Do not rebuild Dean's login, Aiden's submissions, or Boitu's targets, forecasts, alerts or meeting report.
+
+Aiden's D4 module is complete: create, view, edit, delete, line items, submit, approve and reject. Nothing in `submissions/` is left open.
+
+Still open before Friday's D4 hand-in:
+
+1. **Liam:** add the Spring Boot API to `csharp-ingestion/docker-compose.yml`. From the containers, the forecast URL is `http://forecast:5090` and the alerts URL is `http://api:5080` (`FORECAST_BASE_URL` and `ALERTS_BASE_URL` in `java-api/.env.example`). On a PC they stay `http://localhost:5090` and `http://localhost:5080`.
+2. Click through submitter, approver and decision maker on a fresh emulator run. Forecast columns on the meeting report stay `n/a` until **Run forecast** has been used.
+3. This handoff is on `main`. Continue from here; do not rebuild the Done modules.
+
+Run notes for the next session:
+
+- Start Docker from `csharp-ingestion/` with `docker compose up -d --build`.
+- Start the API from `java-api/` with JDK 17. The default terminal Java on this PC is 11, and Gradle will refuse to start. Set `JAVA_HOME` to `C:\Program Files\Java\jdk-17`, then `.\gradlew.bat bootRun`.
+- Restarting the API logs everyone out. The Android app must be run again from Android Studio after layout changes. Use the full Run button, not Apply Changes.
+- Decision maker login for the new screens: `decisionmaker@example.com` / `Test@1234`.
+- The live database may differ from `03_seed.sql`: the March-May 2026 submission was approved during testing (comment `test`). `docker compose down -v` then `docker compose up -d` restores the seed, and deletes the database. Re-run `POST http://localhost:5080/api/ingestion/run` afterwards so the warnings come back.
 
 ## Repo structure
 
@@ -134,4 +155,4 @@ The database stores passwords as BCrypt hashes (`$2a$10$...`), which Spring Secu
 
 ## For AI assistants working in this repo
 
-Read this file first, then `database/README.md` (tables, columns, allowed values) and the `README.md` in each service folder. Only create or change files inside the member's own feature package in `android-app/` or `java-api/`, or their own `team-submissions/<name>/` folder. Never create or alter database tables, never commit real business data or `.env` files, and use only Moving Average and Exponential Smoothing for forecasting (no ARIMA or machine learning).
+Read this file first, including **Where work stopped**, then `database/README.md` (tables, columns, allowed values) and the `README.md` in each service folder. Only create or change files inside the member's own feature package in `android-app/` or `java-api/`, or their own `team-submissions/<name>/` folder. Never create or alter database tables, never commit real business data or `.env` files, and use only Moving Average and Exponential Smoothing for forecasting (no ARIMA or machine learning). Do not rebuild features whose status is Done.

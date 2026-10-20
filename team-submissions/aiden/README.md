@@ -1,5 +1,7 @@
 # Budget submissions (Aiden Mc Gavigan)
 
+**D4 status: complete.** Do not rebuild this module. Create, view, edit, delete, line items, submit, approve and reject are in the app and the API.
+
 CRUD module for budget submissions and their income-statement line items, plus submit, approve and reject. It lives inside the shared Android app and Spring Boot API. Login, navigation and security stay in Dean's `auth/`, `home/`, `network/` and `config/` packages.
 
 | | |

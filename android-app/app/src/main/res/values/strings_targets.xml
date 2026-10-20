@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_targets">KPI targets</string>
+    <string name="menu_targets_decision">Set the revenue, margin and cost targets you will compare with the forecast.</string>
+    <string name="open_targets">Open KPI targets</string>
+    <string name="menu_insights">Forecasts and alerts</string>
+    <string name="menu_insights_decision">Compare Moving Average with Exponential Smoothing, and read inflation, fuel and electricity warnings.</string>
+    <string name="open_insights">Open forecasts and alerts</string>
+
+    <string name="targets_title">KPI targets</string>
+    <string name="targets_subtitle">Targets for this business</string>
+    <string name="targets_guide">Tap a target to change it, or add a new one. The same name cannot be used twice in one period.</string>
+    <string name="targets_empty">No KPI targets yet. Add the first one for this business.</string>
+    <string name="target_new">New target</string>
+    <string name="target_edit">Edit target</string>
+    <string name="target_metric">Metric name</string>
+    <string name="target_value">Target value</string>
+    <string name="target_unit">Measurement unit</string>
+    <string name="target_unit_hint">ZAR or percent</string>
+    <string name="target_period">Target period</string>
+    <string name="target_period_hint">First day of the period, for example 2026-03-01</string>
+    <string name="target_save">Save target</string>
+    <string name="target_delete">Delete target</string>
+    <string name="target_saved">Target saved.</string>
+    <string name="target_deleted">Target deleted.</string>
+    <string name="target_delete_title">Delete this target?</string>
+    <string name="target_delete_message">This removes the target. It does not change any budget submission.</string>
+    <string name="target_metric_required">Enter a metric name.</string>
+    <string name="target_value_invalid">Enter a number for the target value.</string>
+    <string name="target_unit_required">Enter a measurement unit, such as ZAR or percent.</string>
+    <string name="target_period_invalid">Enter the period as a date, for example 2026-03-01.</string>
+
+    <string name="insights_title">Forecasts and alerts</string>
+    <string name="insights_subtitle">Next year, from approved history</string>
+    <string name="insights_run">Run forecast</string>
+    <string name="insights_running">Running both methods…</string>
+    <string name="insights_forecasts_heading">Forecasts</string>
+    <string name="insights_alerts_heading">Economic warnings</string>
+    <string name="insights_forecasts_empty">No forecasts yet. Run both methods to compare the next year.</string>
+    <string name="insights_alerts_empty">No economic warnings yet. Run the data ingest from the C# service if this stays empty.</string>
+    <string name="insights_history">History %1$s to %2$s</string>
+    <string name="insights_method_ma">Moving average</string>
+    <string name="insights_method_es">Exponential smoothing</string>
+    <string name="insights_done">Forecast saved. Both methods are shown below.</string>
+
+    <string name="menu_report">Meeting report</string>
+    <string name="menu_report_decision">One page of the approved year, both forecasts, targets and economic warnings.</string>
+    <string name="open_report">Open meeting report</string>
+    <string name="report_title">Meeting report</string>
+    <string name="report_subtitle">For review on a phone or by email</string>
+    <string name="report_share">Email report</string>
+    <string name="report_share_chooser">Send the budget report</string>
+    <string name="report_share_missing">No email app is installed on this device. The report on this screen is the copy to use.</string>
+    <string name="report_prepared">Prepared for %1$s\n%2$s</string>
+    <string name="report_column_last">Last approved year</string>
+    <string name="report_column_ma">Moving average</string>
+    <string name="report_column_es">Exponential smoothing</string>
+    <string name="report_section_history">Who approved it</string>
+    <string name="report_approvals_empty">Nothing has been approved yet.</string>
+    <string name="report_targets_empty">No KPI targets have been set.</string>
+    <string name="report_warnings_empty">No open economic warnings.</string>
+    <string name="report_approved_on">Approved %1$s</string>
+    <string name="report_covers">Covers %1$s</string>
+    <string name="report_figure_target">Target</string>
+    <string name="report_target_period">For the period starting %1$s</string>
+    <string name="report_section_compare">Latest year and forecasts</string>
+    <string name="report_section_results">Results for that year</string>
+    <string name="report_section_targets">KPI targets</string>
+    <string name="report_section_warnings">Economic warnings</string>
+    <string name="report_footnote">Revenue and employee costs are set by the business. Warnings apply to the other categories they name. Email uses the mail app already on this phone. This app does not store mail passwords.</string>
+</resources>

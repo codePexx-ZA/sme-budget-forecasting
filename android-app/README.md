@@ -7,8 +7,8 @@ The SME Budget mobile app (Java). It talks to the Spring Boot API in `java-api/`
 | `auth/` | Dean | Login and create account screens, session storage, logout |
 | `home/` | Dean | Home screen after login with a menu for each role |
 | `network/` | Dean (shared) | `ApiClient` (Retrofit) and `ApiErrors`. Ask Dean before changing. |
-| `submissions/` | Aiden | Budget submission screens (to add) |
-| `targets/` | Boitu | KPI target and forecast screens (to add) |
+| `submissions/` | Aiden | Budget submission screens. D4 scope for this package is complete |
+| `targets/` | Boitu | KPI targets, forecasts, warnings and the meeting report |
 
 The theme and colours in `res/values/themes.xml` and `colors.xml` are shared too.
 
@@ -25,7 +25,9 @@ The theme and colours in `res/values/themes.xml` and `colors.xml` are shared too
 |---|---|
 | Submitter | Budget submissions: create, edit and submit income statements |
 | Approver | Review submissions: approve or reject waiting submissions |
-| Decision Maker | Budget submissions (view only). KPI targets and forecasts to be added by Boitu |
+| Decision Maker | Meeting report, budget submissions (view only), KPI targets, forecasts and economic warnings |
+
+The meeting report and the forecast screen use a section heading, then a label with its figure on the same row. The emailed report stays plain text.
 
 Hiding a menu option is only for convenience. The API checks the role again on every request, so a user can't reach another role's actions by other means.
 
