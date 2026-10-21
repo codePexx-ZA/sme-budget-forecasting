@@ -16,6 +16,10 @@ public interface SubmissionsApi {
     @GET("api/submissions/categories")
     Call<List<CategoryDto>> categories();
 
+    /** This business's year-end, from the business row the meeting report already reads. */
+    @GET("api/reports/financial-year")
+    Call<FinancialYearDto> financialYear();
+
     @GET("api/submissions")
     Call<List<SubmissionSummary>> list();
 

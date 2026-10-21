@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.smebudget.api.submissions.BudgetSubmission;
 import com.smebudget.api.submissions.FinancialLineItem;
+import com.smebudget.api.submissions.LineCategory;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -64,6 +65,26 @@ class ReportServiceTest {
         assertTrue(text.contains("R 5,420,000.00"));
         assertTrue(text.contains("Fuel is up"));
         assertTrue(text.contains("waiting for approval"));
+    }
+
+    @Test
+    void targetNamesTheReportAlreadyComparesStayMatched() {
+        List<LineCategory> categories = List.of(
+                new LineCategory("revenue", "Revenue", (short) 1, true),
+                new LineCategory("employee_costs", "Employee costs", (short) 4, true),
+                new LineCategory("electricity", "Electricity", (short) 6, false),
+                new LineCategory("cost_of_sales", "Cost of sales", (short) 3, false),
+                new LineCategory("transport_fuel", "Transport and fuel", (short) 8, false));
+
+        assertEquals("revenue", ReportService.categoryForTarget("Revenue", categories));
+        assertEquals("revenue", ReportService.categoryForTarget("revenue", categories));
+        assertEquals("electricity", ReportService.categoryForTarget("Electricity", categories));
+        assertEquals("electricity", ReportService.categoryForTarget("Electricity cost", categories));
+        assertEquals("employee_costs", ReportService.categoryForTarget("Employee costs", categories));
+        assertEquals("cost_of_sales", ReportService.categoryForTarget("Cost of sales", categories));
+        assertEquals("transport_fuel", ReportService.categoryForTarget("Transport and fuel", categories));
+        assertEquals(null, ReportService.categoryForTarget("Gross profit margin", categories));
+        assertEquals(null, ReportService.categoryForTarget("  gross profit margin ", categories));
     }
 
     private static BudgetSubmission submission(String id, String status, Instant submittedAt) {

@@ -35,6 +35,15 @@
             android:textAppearance="@style/TextAppearance.Sme.BodyMuted" />
 
         <TextView
+            android:id="@+id/rejectionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_8"
+            android:textAppearance="@style/TextAppearance.Sme.Body"
+            android:textColor="@color/status_rejected_fg"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/metaText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -546,7 +546,42 @@ public class SubmissionService {
                 submission.getSubmittedAt(),
                 submission.getImportMethod(),
                 submission.getSourceScale(),
-                lineItems.findBySubmissionId(submission.getSubmissionId()).size());
+                lineItems.findBySubmissionId(submission.getSubmissionId()).size(),
+                latestRejectionComment(submission));
+    }
+
+    /**
+     * The comment the approver wrote last time they sent this budget back.
+     * Empty for every status except rejected, so an old note does not stay on a budget
+     * that has since been submitted again.
+     */
+    private String latestRejectionComment(BudgetSubmission submission) {
+        if (!BudgetSubmission.STATUS_REJECTED.equals(submission.getStatus())) {
+            return null;
+        }
+        ApprovalAction latest = null;
+        for (ApprovalAction action : approvals.findBySubmissionId(submission.getSubmissionId())) {
+            if (!ApprovalAction.DECISION_REJECTED.equals(action.getDecision())) {
+                continue;
+            }
+            if (latest == null || isAfter(action.getActedAt(), latest.getActedAt())) {
+                latest = action;
+            }
+        }
+        if (latest == null || latest.getComments() == null || latest.getComments().isBlank()) {
+            return null;
+        }
+        return latest.getComments().trim();
+    }
+
+    private static boolean isAfter(Instant candidate, Instant current) {
+        if (candidate == null) {
+            return false;
+        }
+        if (current == null) {
+            return true;
+        }
+        return candidate.isAfter(current);
     }
 
     private SubmissionResponse toResponse(BudgetSubmission submission) {

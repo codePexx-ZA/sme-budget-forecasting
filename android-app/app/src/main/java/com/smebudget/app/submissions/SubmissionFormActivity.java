@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -56,6 +57,7 @@ public class SubmissionFormActivity extends AppCompatActivity {
     private final List<CategoryDto> categories = new ArrayList<>();
     private final List<SubmissionSummary> summaries = new ArrayList<>();
     private SubmissionDetail loadedDetail;
+    private FinancialYearDto financialYear;
     private CodedOption[] categoryOptions = new CodedOption[0];
     private CodedOption[] importOptions;
     private CodedOption[] scaleOptions;
@@ -65,8 +67,10 @@ public class SubmissionFormActivity extends AppCompatActivity {
 
     private Call<List<CategoryDto>> categoriesCall;
     private Call<List<SubmissionSummary>> listCall;
+    private Call<FinancialYearDto> yearCall;
     private Call<SubmissionDetail> detailCall;
     private Call<SubmissionDetail> saveCall;
+    private Call<SubmissionDetail> copyCall;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +109,9 @@ public class SubmissionFormActivity extends AppCompatActivity {
                 pickDate(binding.periodStartInput, binding.periodStartLayout));
         binding.periodEndInput.setOnClickListener(v ->
                 pickDate(binding.periodEndInput, binding.periodEndLayout));
+        binding.thisYearButton.setOnClickListener(v -> applyFinancialYear(false));
+        binding.nextYearButton.setOnClickListener(v -> applyFinancialYear(true));
+        binding.copyLinesButton.setOnClickListener(v -> chooseCopySource());
         binding.addLineButton.setOnClickListener(v -> addLine(null, null, null, "annual"));
         binding.saveButton.setOnClickListener(v -> save());
         load();
@@ -126,7 +133,7 @@ public class SubmissionFormActivity extends AppCompatActivity {
         binding.progress.setVisibility(View.VISIBLE);
         binding.loadErrorText.setVisibility(View.GONE);
         boolean needDetail = editingId != null && pendingSnapshot == null;
-        pendingLoads = needDetail ? 3 : 2;
+        pendingLoads = needDetail ? 4 : 3;
         loadError = null;
         expired = false;
 
@@ -192,6 +199,34 @@ public class SubmissionFormActivity extends AppCompatActivity {
                 }
                 if (loadError == null) {
                     loadError = getString(R.string.error_no_connection);
+                }
+                finishLoad();
+            }
+        });
+
+        yearCall = api.financialYear();
+        yearCall.enqueue(new Callback<FinancialYearDto>() {
+            @Override
+            public void onResponse(@NonNull Call<FinancialYearDto> call, @NonNull Response<FinancialYearDto> response) {
+                if (stopped(call)) {
+                    return;
+                }
+                if (SessionNav.expired(SubmissionFormActivity.this, response)) {
+                    expired = true;
+                    finishLoad();
+                    return;
+                }
+                // A missing year does not block the draft. The chips explain that the dates were not filled.
+                if (response.isSuccessful()) {
+                    financialYear = response.body();
+                }
+                finishLoad();
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<FinancialYearDto> call, @NonNull Throwable t) {
+                if (stopped(call)) {
+                    return;
                 }
                 finishLoad();
             }
@@ -499,6 +534,133 @@ public class SubmissionFormActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Fills the two period fields from the business year-end. Dates the submitter already
+     * typed are replaced. Line periods that would fall outside the new range move to the start,
+     * so a copied year can be saved without editing every row.
+     */
+    private void applyFinancialYear(boolean next) {
+        if (financialYear == null) {
+            Toast.makeText(this, R.string.fy_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+        String start = next ? financialYear.nextStart : financialYear.thisStart;
+        String end = next ? financialYear.nextEnd : financialYear.thisEnd;
+        if (start == null || end == null) {
+            Toast.makeText(this, R.string.fy_missing, Toast.LENGTH_LONG).show();
+            return;
+        }
+        setDate(binding.periodStartInput, start);
+        setDate(binding.periodEndInput, end);
+        binding.periodStartLayout.setError(null);
+        binding.periodEndLayout.setError(null);
+        for (LineRow row : rows) {
+            String linePeriod = isoOf(row.binding.linePeriodInput);
+            if (linePeriod == null || linePeriod.compareTo(start) < 0 || linePeriod.compareTo(end) > 0) {
+                setDate(row.binding.linePeriodInput, start);
+                row.binding.linePeriodLayout.setError(null);
+            }
+        }
+    }
+
+    /** Approved budgets only. The detail call is the same one the form uses when editing. */
+    private void chooseCopySource() {
+        List<SubmissionSummary> approved = new ArrayList<>();
+        for (SubmissionSummary summary : summaries) {
+            if (summary.submissionId == null || summary.submissionId.equals(editingId)) {
+                continue;
+            }
+            if (!"approved".equals(summary.status)) {
+                continue;
+            }
+            approved.add(summary);
+        }
+        if (approved.isEmpty()) {
+            Toast.makeText(this, R.string.copy_lines_empty, Toast.LENGTH_LONG).show();
+            return;
+        }
+        String[] labels = new String[approved.size()];
+        for (int i = 0; i < approved.size(); i++) {
+            SubmissionSummary summary = approved.get(i);
+            labels[i] = getString(R.string.period_range,
+                    SubmissionText.prettyDate(summary.periodStart),
+                    SubmissionText.prettyDate(summary.periodEnd));
+        }
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.copy_lines_title)
+                .setItems(labels, (dialog, which) -> confirmCopy(approved.get(which).submissionId))
+                .show();
+    }
+
+    private void confirmCopy(String submissionId) {
+        if (!linesHaveFigures()) {
+            loadCopy(submissionId);
+            return;
+        }
+        new MaterialAlertDialogBuilder(this)
+                .setMessage(R.string.copy_lines_replace)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.copy_lines_confirm, (dialog, which) -> loadCopy(submissionId))
+                .show();
+    }
+
+    private boolean linesHaveFigures() {
+        for (LineRow row : rows) {
+            if (textOf(row.binding.amountInput).trim().length() > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void loadCopy(String submissionId) {
+        if (copyCall != null) {
+            copyCall.cancel();
+        }
+        setSaving(true);
+        copyCall = api.get(submissionId);
+        copyCall.enqueue(new Callback<SubmissionDetail>() {
+            @Override
+            public void onResponse(@NonNull Call<SubmissionDetail> call, @NonNull Response<SubmissionDetail> response) {
+                if (stopped(call)) {
+                    return;
+                }
+                setSaving(false);
+                if (SessionNav.expired(SubmissionFormActivity.this, response)) {
+                    return;
+                }
+                if (response.isSuccessful() && response.body() != null) {
+                    applyCopiedLines(response.body());
+                    Toast.makeText(SubmissionFormActivity.this, R.string.copy_lines_done, Toast.LENGTH_LONG).show();
+                } else {
+                    showError(ApiErrors.message(response, getString(R.string.error_unexpected)));
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<SubmissionDetail> call, @NonNull Throwable t) {
+                if (stopped(call)) {
+                    return;
+                }
+                setSaving(false);
+                showError(getString(R.string.error_no_connection));
+            }
+        });
+    }
+
+    /** Copies categories, amounts and frequencies, and points replaces at that budget. Dates stay. */
+    private void applyCopiedLines(SubmissionDetail detail) {
+        replacesOptions = buildReplacesOptions(detail.submissionId);
+        bindOptions(binding.replacesInput, replacesOptions, detail.submissionId);
+        clearLines();
+        if (detail.lineItems != null) {
+            for (LineItemDto line : detail.lineItems) {
+                String amount = line.amount == null ? "" : line.amount.toPlainString();
+                addLine(line.category, line.periodStart, amount, line.frequency);
+            }
+        }
+    }
+
     /** Drops edited rows and leaves the column headings in place. */
     private void clearLines() {
         for (int i = binding.linesContainer.getChildCount() - 1; i >= 0; i--) {
@@ -612,6 +774,9 @@ public class SubmissionFormActivity extends AppCompatActivity {
         binding.progress.setVisibility(saving ? View.VISIBLE : View.GONE);
         binding.saveButton.setEnabled(!saving);
         binding.addLineButton.setEnabled(!saving);
+        binding.copyLinesButton.setEnabled(!saving);
+        binding.thisYearButton.setEnabled(!saving);
+        binding.nextYearButton.setEnabled(!saving);
     }
 
     private void showError(String message) {
@@ -631,8 +796,10 @@ public class SubmissionFormActivity extends AppCompatActivity {
     protected void onDestroy() {
         cancel(categoriesCall);
         cancel(listCall);
+        cancel(yearCall);
         cancel(detailCall);
         cancel(saveCall);
+        cancel(copyCall);
         super.onDestroy();
     }
 

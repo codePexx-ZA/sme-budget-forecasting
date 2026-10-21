@@ -13,4 +13,6 @@ public class SubmissionSummary {
     public String importMethod;
     public Integer sourceScale;
     public int lineItemCount;
+    /** Newest rejection note. Present only while status is rejected. */
+    public String latestRejectionComment;
 }

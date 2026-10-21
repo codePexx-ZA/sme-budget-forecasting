@@ -139,7 +139,8 @@ public class ReportService {
 
         List<KpiTarget> unitTargets = targets.findByUnitIdOrderByTargetPeriodDescMetricNameAsc(user.getUnitId());
         List<MeetingReport.Fact> resultLines = results(history.amounts(), unitTargets);
-        List<MeetingReport.TargetLine> targetLines = targetLines(unitTargets, history.amounts(), movingAverage, smoothing);
+        List<MeetingReport.TargetLine> targetLines = targetLines(
+                unitTargets, categoryRows, history.amounts(), movingAverage, smoothing);
         List<MeetingReport.ApprovalNote> approvalLines = approvalLines(approved);
         List<MeetingReport.WarningLine> warningLines = warningLines();
 
@@ -316,7 +317,25 @@ public class ReportService {
         return lines;
     }
 
+    @Transactional(readOnly = true)
+    public FinancialYearResponse financialYear(AuthenticatedUser principal) {
+        AppUser user = requireUser(principal);
+        int month = FinancialYear.DEFAULT_YEAR_END_MONTH;
+        ReportUnit unit = units.findById(user.getUnitId()).orElse(null);
+        if (unit != null) {
+            month = businesses.findById(unit.getBusinessId())
+                    .map(business -> FinancialYear.month(business.getYearEndMonth()))
+                    .orElse(FinancialYear.DEFAULT_YEAR_END_MONTH);
+        }
+        LocalDate today = LocalDate.now(JOHANNESBURG);
+        FinancialYear.Span current = FinancialYear.containing(today, month);
+        FinancialYear.Span next = FinancialYear.following(current);
+        return new FinancialYearResponse(
+                month, current.start(), current.end(), next.start(), next.end());
+    }
+
     private List<MeetingReport.TargetLine> targetLines(List<KpiTarget> unitTargets,
+                                                      List<LineCategory> categoryRows,
                                                       Map<String, BigDecimal> lastYear,
                                                       Map<String, BigDecimal> movingAverage,
                                                       Map<String, BigDecimal> smoothing) {
@@ -325,7 +344,7 @@ public class ReportService {
             String value = "ZAR".equalsIgnoreCase(target.getMeasurementUnit())
                     ? money(target.getTargetValue())
                     : target.getTargetValue().stripTrailingZeros().toPlainString() + " " + target.getMeasurementUnit();
-            String category = categoryForTarget(target.getMetricName());
+            String category = categoryForTarget(target.getMetricName(), categoryRows);
             boolean compare = category != null && "ZAR".equalsIgnoreCase(target.getMeasurementUnit());
             lines.add(new MeetingReport.TargetLine(
                     target.getMetricName(),
@@ -435,11 +454,29 @@ public class ReportService {
         return text.toString().trim();
     }
 
-    private static String categoryForTarget(String metricName) {
+    /**
+     * Category code a ZAR target can be compared with, or null when the name is not a line.
+     * Display names such as "Employee costs" match {@code line_category}. "revenue" and
+     * "electricity" still match, including the saved name "Electricity cost".
+     * "Gross profit margin" stays null so the margin note on the results section keeps it.
+     */
+    static String categoryForTarget(String metricName, List<LineCategory> categories) {
         if (metricName == null) {
             return null;
         }
-        String key = metricName.toLowerCase(Locale.ROOT).replace(" cost", "").trim();
+        String trimmed = metricName.trim();
+        if (trimmed.isEmpty() || "gross profit margin".equalsIgnoreCase(trimmed)) {
+            return null;
+        }
+        if (categories != null) {
+            for (LineCategory category : categories) {
+                if (category.getCategoryCode().equalsIgnoreCase(trimmed)
+                        || category.getDisplayName().equalsIgnoreCase(trimmed)) {
+                    return category.getCategoryCode();
+                }
+            }
+        }
+        String key = trimmed.toLowerCase(Locale.ROOT).replace(" cost", "").trim();
         if ("revenue".equals(key) || "electricity".equals(key)) {
             return key;
         }
