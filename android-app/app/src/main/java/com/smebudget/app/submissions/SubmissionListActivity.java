@@ -22,10 +22,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Lists the business unit's budget submissions (Aiden).
- * A submitter can start a new one. Everyone logged in can open a row to read it.
- */
+/** Lists this business unit's budgets and filters them by status. */
 public class SubmissionListActivity extends AppCompatActivity {
 
     private ActivitySubmissionListBinding binding;

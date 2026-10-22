@@ -1,6 +1,6 @@
 package com.smebudget.app.submissions;
 
-/** Dates from GET /api/reports/financial-year. Dates are yyyy-MM-dd. */
+/** Holds this financial year and the next one for the budget form. */
 public class FinancialYearDto {
 
     public int yearEndMonth;

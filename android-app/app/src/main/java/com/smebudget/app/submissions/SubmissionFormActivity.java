@@ -35,10 +35,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Creates a draft or edits a draft or rejected submission (Aiden).
- * The phone checks the dates and amounts first. The API checks them again.
- */
+/** Creates or edits a draft budget, including copied lines and the financial year. */
 public class SubmissionFormActivity extends AppCompatActivity {
 
     public static final String EXTRA_ID = "submission_id";

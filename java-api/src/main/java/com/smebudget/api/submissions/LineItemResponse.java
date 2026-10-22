@@ -3,7 +3,7 @@ package com.smebudget.api.submissions;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/** A saved line. amount is rands. */
+/** Holds one saved budget line returned by the API. */
 public record LineItemResponse(
         String lineItemId,
         String category,

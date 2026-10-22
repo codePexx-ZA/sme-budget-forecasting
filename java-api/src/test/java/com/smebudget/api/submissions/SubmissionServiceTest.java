@@ -28,9 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-/**
- * Unit tests for budget submissions. Repositories are in-memory fakes, so no database is required.
- */
+/** Checks budget submission behaviour with in-memory repositories. */
 class SubmissionServiceTest {
 
     private static final String UNIT = "20000000000000000000000000000001";

@@ -14,7 +14,7 @@ import com.smebudget.app.databinding.ItemSubmissionBinding;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Rows on the submission list. Tap a row to open that budget. */
+/** Binds each budget to a row on the submissions list. */
 public class SubmissionAdapter extends RecyclerView.Adapter<SubmissionAdapter.Holder> {
 
     /** Called when a row is tapped. */

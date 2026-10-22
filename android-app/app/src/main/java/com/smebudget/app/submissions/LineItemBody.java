@@ -2,7 +2,7 @@ package com.smebudget.app.submissions;
 
 import java.math.BigDecimal;
 
-/** One line sent with a submission. category is the category code, not the display name. */
+/** Holds one budget line sent with a submission. */
 public class LineItemBody {
 
     final String category;

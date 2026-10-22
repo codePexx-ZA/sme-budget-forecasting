@@ -3,10 +3,7 @@ package com.smebudget.api.submissions;
 import java.time.Instant;
 import java.time.LocalDate;
 
-/**
- * One row for the submissions list. Line amounts are loaded only on the detail call.
- * {@code latestRejectionComment} is the newest rejection note, and only while the row is rejected.
- */
+/** Holds one budget-list row, including the latest rejection comment. */
 public record SubmissionSummary(
         String submissionId,
         String submittedBy,

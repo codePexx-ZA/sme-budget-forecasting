@@ -15,25 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Budget submissions (Aiden). Every call needs a login token. Roles are checked again in
- * {@link SubmissionService}; these annotations are the HTTP gate.
- *
- * <pre>
- * GET    /api/submissions/categories                         any logged-in user
- * GET    /api/submissions                                    any logged-in user, own business unit
- * GET    /api/submissions/{id}                               any logged-in user, own business unit
- * POST   /api/submissions                                    submitter, creates a draft
- * PUT    /api/submissions/{id}                               submitter, draft or rejected
- * DELETE /api/submissions/{id}                               submitter, draft or rejected
- * POST   /api/submissions/{id}/line-items                    submitter, draft or rejected
- * PUT    /api/submissions/{id}/line-items/{lineItemId}       submitter, draft or rejected
- * DELETE /api/submissions/{id}/line-items/{lineItemId}       submitter, draft or rejected
- * POST   /api/submissions/{id}/submit                        submitter
- * POST   /api/submissions/{id}/approve                       approver
- * POST   /api/submissions/{id}/reject                        approver, comment required
- * </pre>
- */
+/** Serves the budget submission HTTP endpoints. */
 @RestController
 @RequestMapping("/api/submissions")
 public class SubmissionController {

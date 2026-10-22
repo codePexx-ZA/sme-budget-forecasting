@@ -5,10 +5,7 @@ import android.widget.TextView;
 
 import com.smebudget.app.R;
 
-/**
- * Draws a status so the word is not the only signal: draft is dashed, waiting has a start bar,
- * approved has a thick bottom edge, rejected is a solid outline, and superseded is dotted.
- */
+/** Paints the status chip on a budget. */
 final class StatusChips {
 
     private StatusChips() {

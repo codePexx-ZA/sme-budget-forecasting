@@ -3,7 +3,7 @@ package com.smebudget.api.submissions;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-/** Reads and writes budget_submission. The table itself lives in database/init. */
+/** Loads and saves budget submissions. */
 public interface BudgetSubmissionRepository extends JpaRepository<BudgetSubmission, String> {
 
     List<BudgetSubmission> findByUnitId(String unitId);

@@ -2,7 +2,7 @@ package com.smebudget.app.submissions;
 
 import java.util.List;
 
-/** Body of POST and PUT /api/submissions. Amounts are already in rands. */
+/** Holds the body sent when creating or updating a budget. */
 public class SubmissionBody {
 
     final String periodStart;

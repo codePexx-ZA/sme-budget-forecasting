@@ -1,6 +1,6 @@
 package com.smebudget.app.submissions;
 
-/** One row from GET /api/submissions. Dates are yyyy-MM-dd. */
+/** Holds one budget row from the submissions list. */
 public class SubmissionSummary {
 
     public String submissionId;

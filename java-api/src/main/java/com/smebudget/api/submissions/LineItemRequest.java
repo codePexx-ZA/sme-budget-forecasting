@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-/** One income-statement line. category is a line_category.category_code. */
+/** Holds one income-statement line sent with a budget. */
 public record LineItemRequest(
         @NotBlank(message = "Each line needs a category.")
         String category,

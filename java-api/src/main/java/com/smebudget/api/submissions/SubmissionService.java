@@ -20,15 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Budget submissions (Aiden): create, view, edit and delete a submission and its line items,
- * then submit, approve or reject it.
- *
- * <p>Amounts are stored in rands. A draft or a rejected submission can still be changed.
- * Submitting it sends it to an approver. Approving a submission that replaces an approved one
- * marks the older one superseded; it is kept for history and is not deleted. Forecasts read
- * only approved submissions (that rule lives in the forecasting service).
- */
+/** Creates, edits, lists, and approves or rejects budget submissions. */
 @Service
 public class SubmissionService {
 
