@@ -1,6 +1,6 @@
 # Budget submissions (Aiden Mc Gavigan)
 
-**D4 status: complete.** Do not rebuild this module. Create, view, edit, delete, line items, submit, approve and reject are in the app and the API.
+**D4 status: complete.** Create, view, edit, delete, line items, submit, approve and reject are in the app and the API.
 
 CRUD module for budget submissions and their income-statement line items, plus submit, approve and reject. It lives inside the shared Android app and Spring Boot API. Login, navigation and security stay in Dean's `auth/`, `home/`, `network/` and `config/` packages.
 
@@ -18,17 +18,15 @@ The screens are opened from Home → **Budget submissions**. A submitter can cre
 
 ## Run only this part
 
-1. Start PostgreSQL (see the main README): from `csharp-ingestion/`, `docker compose up -d`.
-2. In `java-api/`, copy `.env.example` to `.env` and set `POSTGRES_PASSWORD` to the same value as `csharp-ingestion/.env`.
-3. Run Aiden's tests (no database needed):
+1. Start the system (see the main README): from `csharp-ingestion/`, `docker compose up -d --build`. That starts the database and the API.
+2. Run Aiden's tests (no database needed, JDK 17):
 
 ```bash
 cd java-api
 ./gradlew test --tests com.smebudget.api.submissions.SubmissionServiceTest
 ```
 
-4. Start the API: `./gradlew bootRun` (http://localhost:8080).
-5. Open `android-app/` in Android Studio and run it on an emulator. Log in, then open **Budget submissions**.
+3. Open `android-app/` in Android Studio and run it on an emulator. The API is already on http://localhost:8080. Log in, then open **Budget submissions**.
 
 Sample logins (password `Test@1234`): `submitter@example.com`, `approver@example.com`, `decisionmaker@example.com`. The sample unit already has an approved history, one submission waiting for approval, and one draft.
 

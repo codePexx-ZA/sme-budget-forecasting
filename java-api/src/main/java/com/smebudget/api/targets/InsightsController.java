@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Forecasts and economic warnings for the decision maker (Boitu).
- * The Android app calls these. This API then calls the Python and C# services on this PC.
+ * The Android app calls these. This API then calls the Python and C# services.
  *
  * <pre>
- * GET  /api/insights/forecasts   latest saved runs for the user's business unit
+ * GET  /api/insights/forecasts   decision maker: latest saved runs for this business unit
  * POST /api/insights/forecasts   decision maker: run Moving Average and Exponential Smoothing
- * GET  /api/insights/alerts      open economic warnings
+ * GET  /api/insights/alerts      decision maker: open economic warnings
  * </pre>
  */
 @RestController
@@ -30,6 +30,7 @@ public class InsightsController {
     }
 
     @GetMapping("/forecasts")
+    @PreAuthorize("hasRole('DECISION_MAKER')")
     public List<ForecastView> forecasts(@AuthenticationPrincipal AuthenticatedUser user) {
         return insights.listForecasts(user);
     }
@@ -41,6 +42,7 @@ public class InsightsController {
     }
 
     @GetMapping("/alerts")
+    @PreAuthorize("hasRole('DECISION_MAKER')")
     public List<AlertView> alerts(@AuthenticationPrincipal AuthenticatedUser user) {
         return insights.listAlerts(user);
     }

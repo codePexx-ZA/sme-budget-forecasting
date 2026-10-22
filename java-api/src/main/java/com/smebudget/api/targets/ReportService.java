@@ -130,11 +130,14 @@ public class ReportService {
             if (last == null && average == null && smooth == null) {
                 continue;
             }
+            boolean higherIsBetter = INCOME.contains(category.getCategoryCode());
             rows.add(new MeetingReport.ComparisonRow(
                     category.getDisplayName(),
                     money(last),
                     money(average),
-                    money(smooth)));
+                    money(smooth),
+                    forecastTone(average, last, higherIsBetter),
+                    forecastTone(smooth, last, higherIsBetter)));
         }
 
         List<KpiTarget> unitTargets = targets.findByUnitIdOrderByTargetPeriodDescMetricNameAsc(user.getUnitId());
@@ -149,7 +152,9 @@ public class ReportService {
                 : "Latest approved year starts " + history.period() + ".";
         String forecastNote = forecastPeriod == null
                 ? "No forecast has been run yet. Open Forecasts and alerts, run both methods, then open this report again."
-                : "Forecasts are for the year starting " + forecastPeriod + ". Moving average and exponential smoothing are both shown.";
+                : "Forecasts are for the year starting " + forecastPeriod
+                        + ". Moving average and exponential smoothing are both shown. "
+                        + "Green beats last year. Red is worse, including a higher cost.";
         String excludedNote = excludedNote(waiting, drafts);
         String preparedAt = WHEN.format(Instant.now().atZone(JOHANNESBURG));
 
@@ -346,13 +351,19 @@ public class ReportService {
                     : target.getTargetValue().stripTrailingZeros().toPlainString() + " " + target.getMeasurementUnit();
             String category = categoryForTarget(target.getMetricName(), categoryRows);
             boolean compare = category != null && "ZAR".equalsIgnoreCase(target.getMeasurementUnit());
+            BigDecimal last = compare ? lastYear.get(category) : null;
+            BigDecimal average = compare ? movingAverage.get(category) : null;
+            BigDecimal smooth = compare ? smoothing.get(category) : null;
+            boolean higherIsBetter = compare && INCOME.contains(category);
             lines.add(new MeetingReport.TargetLine(
                     target.getMetricName(),
                     value,
                     String.valueOf(target.getTargetPeriod()),
-                    compare ? money(lastYear.get(category)) : null,
-                    compare ? money(movingAverage.get(category)) : null,
-                    compare ? money(smoothing.get(category)) : null));
+                    compare ? money(last) : null,
+                    compare ? money(average) : null,
+                    compare ? money(smooth) : null,
+                    forecastTone(average, last, higherIsBetter),
+                    forecastTone(smooth, last, higherIsBetter)));
         }
         return lines;
     }
@@ -492,6 +503,22 @@ public class ReportService {
             }
         }
         return total;
+    }
+
+    /**
+     * {@code favorable} when the forecast is a better result than last year.
+     * Income up is better. A cost up is worse. Missing or equal figures stay uncoloured.
+     */
+    static String forecastTone(BigDecimal forecast, BigDecimal lastYear, boolean higherIsBetter) {
+        if (forecast == null || lastYear == null) {
+            return null;
+        }
+        int compared = forecast.compareTo(lastYear);
+        if (compared == 0) {
+            return null;
+        }
+        boolean improved = higherIsBetter ? compared > 0 : compared < 0;
+        return improved ? "favorable" : "unfavorable";
     }
 
     private static String money(BigDecimal value) {

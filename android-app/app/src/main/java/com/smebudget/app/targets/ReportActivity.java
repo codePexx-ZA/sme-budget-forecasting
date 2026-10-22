@@ -8,6 +8,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.smebudget.app.R;
 import com.smebudget.app.auth.SessionManager;
@@ -131,9 +132,9 @@ public class ReportActivity extends AppCompatActivity {
         for (MeetingReportDto.ComparisonRow row : rows) {
             ItemReportRowBinding card = ItemReportRowBinding.inflate(getLayoutInflater(), binding.rowContainer, true);
             card.categoryText.setText(row.category);
-            addMetric(card.metricContainer, getString(R.string.report_column_last), row.lastYear);
-            addMetric(card.metricContainer, getString(R.string.report_column_ma), row.movingAverage);
-            addMetric(card.metricContainer, getString(R.string.report_column_es), row.exponentialSmoothing);
+            addMetric(card.metricContainer, getString(R.string.report_column_last), row.lastYear, null);
+            addMetric(card.metricContainer, getString(R.string.report_column_ma), row.movingAverage, row.movingAverageTone);
+            addMetric(card.metricContainer, getString(R.string.report_column_es), row.exponentialSmoothing, row.exponentialSmoothingTone);
         }
     }
 
@@ -147,12 +148,12 @@ public class ReportActivity extends AppCompatActivity {
         for (MeetingReportDto.TargetLine target : targets) {
             ItemReportRowBinding card = ItemReportRowBinding.inflate(getLayoutInflater(), binding.targetContainer, true);
             card.categoryText.setText(target.name);
-            addMetric(card.metricContainer, getString(R.string.report_figure_target), target.value);
-            addMetric(card.metricContainer, getString(R.string.target_period), getString(R.string.report_target_period, target.period));
+            addMetric(card.metricContainer, getString(R.string.report_figure_target), target.value, null);
+            addMetric(card.metricContainer, getString(R.string.target_period), getString(R.string.report_target_period, target.period), null);
             if (target.lastYear != null) {
-                addMetric(card.metricContainer, getString(R.string.report_column_last), target.lastYear);
-                addMetric(card.metricContainer, getString(R.string.report_column_ma), target.movingAverage);
-                addMetric(card.metricContainer, getString(R.string.report_column_es), target.exponentialSmoothing);
+                addMetric(card.metricContainer, getString(R.string.report_column_last), target.lastYear, null);
+                addMetric(card.metricContainer, getString(R.string.report_column_ma), target.movingAverage, target.movingAverageTone);
+                addMetric(card.metricContainer, getString(R.string.report_column_es), target.exponentialSmoothing, target.exponentialSmoothingTone);
             }
         }
     }
@@ -202,10 +203,24 @@ public class ReportActivity extends AppCompatActivity {
         }
     }
 
-    private void addMetric(android.widget.LinearLayout parent, String label, String value) {
+    private void addMetric(android.widget.LinearLayout parent, String label, String value, String tone) {
         ItemMetricRowBinding row = ItemMetricRowBinding.inflate(getLayoutInflater(), parent, true);
         row.metricLabel.setText(label);
         row.metricValue.setText(value == null ? "" : value);
+        if ("favorable".equals(tone)) {
+            box(row.metricValue, R.drawable.bg_tone_favorable, R.color.status_approved_fg);
+        } else if ("unfavorable".equals(tone)) {
+            box(row.metricValue, R.drawable.bg_tone_unfavorable, R.color.status_rejected_fg);
+        }
+    }
+
+    /** A small coloured box around a forecast that beat or missed last year. */
+    private void box(android.widget.TextView value, int background, int textColor) {
+        int padH = getResources().getDimensionPixelSize(R.dimen.space_8);
+        int padV = getResources().getDimensionPixelSize(R.dimen.space_4);
+        value.setBackgroundResource(background);
+        value.setTextColor(ContextCompat.getColor(this, textColor));
+        value.setPadding(padH, padV, padH, padV);
     }
 
     private void share() {

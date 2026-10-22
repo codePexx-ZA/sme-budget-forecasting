@@ -1,21 +1,21 @@
 <resources>
-    <color name="brand_primary">#2F6F5A</color>
-    <color name="brand_primary_light">#9AD9BE</color>
+    <color name="brand_primary">#1E5A9A</color>
+    <color name="brand_primary_light">#B7D4F5</color>
     <color name="brand_on_primary">#FFFFFF</color>
-    <color name="brand_secondary">#B7D0DC</color>
+    <color name="brand_secondary">#B7CDE4</color>
     <color name="brand_error">#FFB4AB</color>
     <color name="color_on_error">#690005</color>
 
-    <color name="surface">#101614</color>
-    <color name="surface_raised">#1B2622</color>
-    <color name="ink">#E7F1EC</color>
-    <color name="ink_muted">#C3D2CB</color>
-    <color name="outline">#3D5248</color>
-    <color name="primary_container">#1A3C32</color>
-    <color name="on_primary_container">#D7EFE4</color>
+    <color name="surface">#0E1520</color>
+    <color name="surface_raised">#1A2A40</color>
+    <color name="ink">#E7EEF6</color>
+    <color name="ink_muted">#C3D0DE</color>
+    <color name="outline">#31445C</color>
+    <color name="primary_container">#16304C</color>
+    <color name="on_primary_container">#D6E6F7</color>
 
-    <color name="status_draft_bg">#1B2622</color>
-    <color name="status_draft_fg">#E7F1EC</color>
+    <color name="status_draft_bg">#1A2A40</color>
+    <color name="status_draft_fg">#E7EEF6</color>
     <color name="status_waiting_bg">#1A2C36</color>
     <color name="status_waiting_fg">#D6E8F2</color>
     <color name="status_approved_bg">#16382C</color>

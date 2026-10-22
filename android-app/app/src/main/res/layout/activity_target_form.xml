@@ -96,6 +96,23 @@
                     android:layout_marginTop="@dimen/space_16"
                     android:textAppearance="@style/TextAppearance.Sme.Error"
                     android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/saveButton"
+                    style="@style/Widget.Sme.Button.Primary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_16"
+                    android:text="@string/target_save" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/deleteButton"
+                    style="@style/Widget.Sme.Button.Danger"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_8"
+                    android:text="@string/target_delete"
+                    android:visibility="gone" />
             </LinearLayout>
         </ScrollView>
 
@@ -106,23 +123,4 @@
             android:layout_gravity="center"
             android:visibility="gone" />
     </FrameLayout>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/saveButton"
-        style="@style/Widget.Sme.Button.Primary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/screen_padding"
-        android:layout_marginEnd="@dimen/screen_padding"
-        android:layout_marginTop="@dimen/space_8"
-        android:text="@string/target_save" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/deleteButton"
-        style="@style/Widget.Sme.Button.Danger"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/screen_padding"
-        android:text="@string/target_delete"
-        android:visibility="gone" />
 </LinearLayout>
