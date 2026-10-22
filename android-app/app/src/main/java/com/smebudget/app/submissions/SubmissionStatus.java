@@ -1,6 +1,6 @@
 package com.smebudget.app.submissions;
 
-/** Status values from budget_submission.status. They must stay lowercase. */
+/** Names the lowercase budget statuses stored on a submission. */
 final class SubmissionStatus {
 
     static final String DRAFT = "draft";

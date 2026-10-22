@@ -15,22 +15,21 @@ import com.smebudget.app.databinding.ActivitySubmissionListBinding;
 import com.smebudget.app.network.ApiClient;
 import com.smebudget.app.network.ApiErrors;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- * Lists the business unit's budget submissions (Aiden).
- * A submitter can start a new one. Everyone logged in can open a row to read it.
- */
+/** Lists this business unit's budgets and filters them by status. */
 public class SubmissionListActivity extends AppCompatActivity {
 
     private ActivitySubmissionListBinding binding;
     private SessionManager session;
     private SubmissionAdapter adapter;
     private Call<List<SubmissionSummary>> listCall;
+    private final List<SubmissionSummary> allItems = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +52,11 @@ public class SubmissionListActivity extends AppCompatActivity {
         binding.newButton.setOnClickListener(v ->
                 startActivity(new Intent(this, SubmissionFormActivity.class)));
         binding.roleGuide.setText(listGuideRes());
+        // An approver opens on Waiting, so the inbox is the first thing on the screen.
+        if (Roles.APPROVER.equals(session.getRole())) {
+            binding.chipWaiting.setChecked(true);
+        }
+        binding.statusFilters.setOnCheckedStateChangeListener((group, checkedIds) -> showRows());
     }
 
     /** Where to tap next. The New submission button stays hidden unless this user is a submitter. */
@@ -100,14 +104,9 @@ public class SubmissionListActivity extends AppCompatActivity {
                     return;
                 }
                 if (response.isSuccessful() && response.body() != null) {
-                    adapter.setItems(response.body());
-                    if (response.body().isEmpty()) {
-                        int message = Roles.SUBMITTER.equals(session.getRole())
-                                ? R.string.empty_submissions_submitter
-                                : R.string.empty_submissions_other;
-                        binding.emptyText.setText(message);
-                        binding.emptyText.setVisibility(View.VISIBLE);
-                    }
+                    allItems.clear();
+                    allItems.addAll(response.body());
+                    showRows();
                 } else {
                     showError(ApiErrors.message(response, getString(R.string.error_unexpected)));
                 }
@@ -122,6 +121,58 @@ public class SubmissionListActivity extends AppCompatActivity {
                 showError(getString(R.string.error_no_connection));
             }
         });
+    }
+
+    /** Applies the status chip. With no chip selected, every status is shown, including superseded. */
+    private void showRows() {
+        String status = selectedStatus();
+        List<SubmissionSummary> visible = new ArrayList<>();
+        for (SubmissionSummary item : allItems) {
+            if (status == null || status.equals(item.status)) {
+                visible.add(item);
+            }
+        }
+        if (Roles.APPROVER.equals(session.getRole())) {
+            visible.sort(SubmissionListActivity::waitingFirst);
+        }
+        adapter.setItems(visible);
+        if (!visible.isEmpty()) {
+            binding.emptyText.setVisibility(View.GONE);
+            return;
+        }
+        if (allItems.isEmpty()) {
+            int message = Roles.SUBMITTER.equals(session.getRole())
+                    ? R.string.empty_submissions_submitter
+                    : R.string.empty_submissions_other;
+            binding.emptyText.setText(message);
+        } else {
+            binding.emptyText.setText(R.string.empty_filter);
+        }
+        binding.emptyText.setVisibility(View.VISIBLE);
+    }
+
+    private String selectedStatus() {
+        int id = binding.statusFilters.getCheckedChipId();
+        if (id == R.id.chipWaiting) {
+            return SubmissionStatus.SUBMITTED;
+        }
+        if (id == R.id.chipDraft) {
+            return SubmissionStatus.DRAFT;
+        }
+        if (id == R.id.chipRejected) {
+            return SubmissionStatus.REJECTED;
+        }
+        if (id == R.id.chipApproved) {
+            return SubmissionStatus.APPROVED;
+        }
+        return null;
+    }
+
+    /** Waiting rows first. TimSort is stable, so the period order from the API stays inside each group. */
+    private static int waitingFirst(SubmissionSummary left, SubmissionSummary right) {
+        int leftRank = SubmissionStatus.SUBMITTED.equals(left.status) ? 0 : 1;
+        int rightRank = SubmissionStatus.SUBMITTED.equals(right.status) ? 0 : 1;
+        return leftRank - rightRank;
     }
 
     private void showError(String message) {

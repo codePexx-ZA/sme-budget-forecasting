@@ -30,10 +30,7 @@ import retrofit2.Response;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * One budget submission (Aiden): short facts under the title, the line table with profit
- * totals, and the actions the logged-in role is allowed to take.
- */
+/** Shows one budget, its lines and profit totals, and the actions this role can take. */
 public class SubmissionDetailActivity extends AppCompatActivity {
 
     public static final String EXTRA_ID = "submission_id";

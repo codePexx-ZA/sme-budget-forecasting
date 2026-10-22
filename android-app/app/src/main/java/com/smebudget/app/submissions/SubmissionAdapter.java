@@ -14,7 +14,7 @@ import com.smebudget.app.databinding.ItemSubmissionBinding;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Rows on the submission list. Tap a row to open that budget. */
+/** Binds each budget to a row on the submissions list. */
 public class SubmissionAdapter extends RecyclerView.Adapter<SubmissionAdapter.Holder> {
 
     /** Called when a row is tapped. */
@@ -75,6 +75,13 @@ public class SubmissionAdapter extends RecyclerView.Adapter<SubmissionAdapter.Ho
             String meaning = SubmissionText.statusMeaning(context, item.status);
             binding.statusMeaning.setText(meaning);
             binding.statusMeaning.setVisibility(meaning.length() == 0 ? View.GONE : View.VISIBLE);
+            String comment = item.latestRejectionComment == null ? "" : item.latestRejectionComment.trim();
+            if (SubmissionStatus.REJECTED.equals(item.status) && comment.length() > 0) {
+                binding.rejectionText.setText(context.getString(R.string.rejection_comment, comment));
+                binding.rejectionText.setVisibility(View.VISIBLE);
+            } else {
+                binding.rejectionText.setVisibility(View.GONE);
+            }
             binding.metaText.setText(context.getString(
                     R.string.line_meta,
                     item.lineItemCount,

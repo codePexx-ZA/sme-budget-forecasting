@@ -9,10 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Turns stored category amounts into gross profit, operating profit and net profit.
- * See {@link PeriodTotals} for which categories go into which figure.
- */
+/** Calculates gross, operating, and net profit from category amounts. */
 final class StatementTotals {
 
     private static final Set<String> INCOME = Set.of("revenue", "other_income");

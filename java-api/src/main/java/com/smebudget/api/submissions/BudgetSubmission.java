@@ -8,10 +8,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Set;
 
-/**
- * A row of budget_submission (created by database/init/01_schema.sql, never by this code).
- * status is draft, submitted, approved, rejected or superseded.
- */
+/** Maps one row of budget_submission. */
 @Entity
 @Table(name = "budget_submission")
 public class BudgetSubmission {

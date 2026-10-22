@@ -28,9 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-/**
- * Unit tests for budget submissions. Repositories are in-memory fakes, so no database is required.
- */
+/** Checks budget submission behaviour with in-memory repositories. */
 class SubmissionServiceTest {
 
     private static final String UNIT = "20000000000000000000000000000001";
@@ -503,6 +501,43 @@ class SubmissionServiceTest {
 
         assertEquals(later.submissionId(), listed.get(0).submissionId());
         assertEquals(0, listed.get(0).lineItemCount());
+        assertNull(listed.get(0).latestRejectionComment());
+    }
+
+    @Test
+    void listKeepsOnlyTheLatestRejectionComment() {
+        SubmissionResponse created = service.create(submitter, request(
+                date(2026, 5, 1), date(2026, 5, 31), "manual", null, 1, null,
+                List.of(line("revenue", date(2026, 5, 1), "10", "annual"))));
+        service.submit(submitter, created.submissionId());
+        service.reject(approver, created.submissionId(), "Fix the fuel line.");
+
+        storedApprovals.add(new ApprovalAction(
+                "older-note", created.submissionId(), APPROVER_ID,
+                ApprovalAction.DECISION_REJECTED, "Older note", Instant.EPOCH));
+        storedApprovals.add(new ApprovalAction(
+                "approval-note", created.submissionId(), APPROVER_ID,
+                ApprovalAction.DECISION_APPROVED, "Looks fine", Instant.parse("2026-12-01T00:00:00Z")));
+
+        SubmissionResponse draft = service.create(submitter, request(
+                date(2026, 4, 1), date(2026, 4, 30), "manual", null, 1, null, List.of()));
+
+        SubmissionSummary rejected = null;
+        SubmissionSummary stillDraft = null;
+        for (SubmissionSummary row : service.list(approver)) {
+            if (created.submissionId().equals(row.submissionId())) {
+                rejected = row;
+            }
+            if (draft.submissionId().equals(row.submissionId())) {
+                stillDraft = row;
+            }
+        }
+
+        assertNotNull(rejected);
+        assertEquals(BudgetSubmission.STATUS_REJECTED, rejected.status());
+        assertEquals("Fix the fuel line.", rejected.latestRejectionComment());
+        assertNotNull(stillDraft);
+        assertNull(stillDraft.latestRejectionComment());
     }
 
     @Test

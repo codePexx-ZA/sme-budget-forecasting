@@ -20,15 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Budget submissions (Aiden): create, view, edit and delete a submission and its line items,
- * then submit, approve or reject it.
- *
- * <p>Amounts are stored in rands. A draft or a rejected submission can still be changed.
- * Submitting it sends it to an approver. Approving a submission that replaces an approved one
- * marks the older one superseded; it is kept for history and is not deleted. Forecasts read
- * only approved submissions (that rule lives in the forecasting service).
- */
+/** Creates, edits, lists, and approves or rejects budget submissions. */
 @Service
 public class SubmissionService {
 
@@ -546,7 +538,42 @@ public class SubmissionService {
                 submission.getSubmittedAt(),
                 submission.getImportMethod(),
                 submission.getSourceScale(),
-                lineItems.findBySubmissionId(submission.getSubmissionId()).size());
+                lineItems.findBySubmissionId(submission.getSubmissionId()).size(),
+                latestRejectionComment(submission));
+    }
+
+    /**
+     * The comment the approver wrote last time they sent this budget back.
+     * Empty for every status except rejected, so an old note does not stay on a budget
+     * that has since been submitted again.
+     */
+    private String latestRejectionComment(BudgetSubmission submission) {
+        if (!BudgetSubmission.STATUS_REJECTED.equals(submission.getStatus())) {
+            return null;
+        }
+        ApprovalAction latest = null;
+        for (ApprovalAction action : approvals.findBySubmissionId(submission.getSubmissionId())) {
+            if (!ApprovalAction.DECISION_REJECTED.equals(action.getDecision())) {
+                continue;
+            }
+            if (latest == null || isAfter(action.getActedAt(), latest.getActedAt())) {
+                latest = action;
+            }
+        }
+        if (latest == null || latest.getComments() == null || latest.getComments().isBlank()) {
+            return null;
+        }
+        return latest.getComments().trim();
+    }
+
+    private static boolean isAfter(Instant candidate, Instant current) {
+        if (candidate == null) {
+            return false;
+        }
+        if (current == null) {
+            return true;
+        }
+        return candidate.isAfter(current);
     }
 
     private SubmissionResponse toResponse(BudgetSubmission submission) {

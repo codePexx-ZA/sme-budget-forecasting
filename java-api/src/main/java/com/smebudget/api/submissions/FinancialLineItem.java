@@ -8,10 +8,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
-/**
- * One amount for one income-statement category in one period (financial_line_item).
- * Amounts are rands. frequency is monthly, quarterly or annual.
- */
+/** Maps one category amount for one period in financial_line_item. */
 @Entity
 @Table(name = "financial_line_item")
 public class FinancialLineItem {

@@ -2,7 +2,7 @@ package com.smebudget.app.submissions;
 
 import java.math.BigDecimal;
 
-/** A saved line. amount is rands. */
+/** Holds one saved budget line, with the amount in rands. */
 public class LineItemDto {
 
     public String lineItemId;

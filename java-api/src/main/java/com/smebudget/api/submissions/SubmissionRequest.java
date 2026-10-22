@@ -6,11 +6,7 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
 
-/**
- * Body of POST /api/submissions and PUT /api/submissions/{id}.
- * Amounts are rands. On update, a missing lineItems list leaves the existing lines unchanged;
- * an empty list clears them.
- */
+/** Holds the body for creating or updating a budget. */
 public record SubmissionRequest(
         @NotNull(message = "Period start is required.")
         LocalDate periodStart,

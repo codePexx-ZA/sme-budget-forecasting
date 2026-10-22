@@ -17,6 +17,10 @@ public class ReportBusiness {
     @Column(name = "legal_name", nullable = false, length = 200)
     private String legalName;
 
+    /** Last month of the financial year. 2 is February, the usual South African year-end. */
+    @Column(name = "year_end_month", nullable = false)
+    private short yearEndMonth = 2;
+
     protected ReportBusiness() {
     }
 
@@ -26,5 +30,9 @@ public class ReportBusiness {
 
     public String getLegalName() {
         return legalName;
+    }
+
+    public int getYearEndMonth() {
+        return yearEndMonth;
     }
 }

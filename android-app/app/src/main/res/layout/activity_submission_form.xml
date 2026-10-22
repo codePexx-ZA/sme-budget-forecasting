@@ -92,6 +92,37 @@
                         android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_12"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/thisYearButton"
+                        style="@style/Widget.Sme.Button.Secondary"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/space_8"
+                        android:layout_weight="1"
+                        android:text="@string/fy_this" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/nextYearButton"
+                        style="@style/Widget.Sme.Button.Secondary"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/fy_next" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_4"
+                    android:text="@string/fy_help"
+                    android:textAppearance="@style/TextAppearance.Sme.BodyMuted" />
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -159,6 +190,14 @@
                         android:layout_height="wrap_content"
                         android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/copyLinesButton"
+                    style="@style/Widget.Sme.Button.Secondary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_12"
+                    android:text="@string/copy_lines" />
 
                 <TextView
                     android:layout_width="match_parent"

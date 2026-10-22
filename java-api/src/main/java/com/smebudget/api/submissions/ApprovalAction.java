@@ -6,10 +6,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
 
-/**
- * One approve or reject decision (approval_action). A rejection must have comments;
- * the database rejects a row that breaks that rule.
- */
+/** Maps one approve or reject decision in approval_action. */
 @Entity
 @Table(name = "approval_action")
 public class ApprovalAction {

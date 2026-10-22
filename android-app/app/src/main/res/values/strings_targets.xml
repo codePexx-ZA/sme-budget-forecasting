@@ -14,6 +14,8 @@
     <string name="target_new">New target</string>
     <string name="target_edit">Edit target</string>
     <string name="target_metric">Metric name</string>
+    <string name="target_metric_hint">Revenue, Electricity, Employee costs, Gross profit margin, and the other income statement lines.</string>
+    <string name="target_margin">Gross profit margin</string>
     <string name="target_value">Target value</string>
     <string name="target_unit">Measurement unit</string>
     <string name="target_unit_hint">ZAR or percent</string>
