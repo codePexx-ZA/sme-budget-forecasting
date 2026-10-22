@@ -99,14 +99,14 @@ public class HomeActivity extends AppCompatActivity {
             addMenuItem(R.string.menu_review_submissions, R.string.menu_submissions_approver,
                     SubmissionListActivity.class, R.string.open_submissions);
         } else if (Roles.DECISION_MAKER.equals(role)) {
-            addMenuItem(R.string.menu_report, R.string.menu_report_decision,
-                    ReportActivity.class, R.string.open_report);
             addMenuItem(R.string.menu_submissions, R.string.menu_submissions_decision_maker,
                     SubmissionListActivity.class, R.string.open_submissions);
             addMenuItem(R.string.menu_targets, R.string.menu_targets_decision,
                     TargetListActivity.class, R.string.open_targets);
             addMenuItem(R.string.menu_insights, R.string.menu_insights_decision,
                     InsightsActivity.class, R.string.open_insights);
+            addMenuItem(R.string.menu_report, R.string.menu_report_decision,
+                    ReportActivity.class, R.string.open_report);
         }
 
         if (binding.menuContainer.getChildCount() == 0) {

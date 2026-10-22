@@ -29,6 +29,8 @@ How it works:
 
 ## Run it (Windows)
 
+`docker compose up -d --build` from `csharp-ingestion/` starts this API in the `java-api` container on port 8080. Use the steps below only when you want to run it on the host instead. Stop `budget-java-api` first.
+
 1. Start the database: in `csharp-ingestion/`, run `docker compose up -d` (see the main README).
 2. In `java-api/`, copy the settings file once and set `POSTGRES_PASSWORD` to the same password as `csharp-ingestion/.env`:
 

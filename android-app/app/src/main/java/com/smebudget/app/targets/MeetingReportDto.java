@@ -24,6 +24,8 @@ public class MeetingReportDto {
         public String lastYear;
         public String movingAverage;
         public String exponentialSmoothing;
+        public String movingAverageTone;
+        public String exponentialSmoothingTone;
     }
 
     public static class ApprovalNote {
@@ -46,6 +48,8 @@ public class MeetingReportDto {
         public String lastYear;
         public String movingAverage;
         public String exponentialSmoothing;
+        public String movingAverageTone;
+        public String exponentialSmoothingTone;
     }
 
     public static class WarningLine {

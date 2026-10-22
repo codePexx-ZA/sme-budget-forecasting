@@ -46,7 +46,7 @@
     <string name="insights_done">Forecast saved. Both methods are shown below.</string>
 
     <string name="menu_report">Meeting report</string>
-    <string name="menu_report_decision">One page of the approved year, both forecasts, targets and economic warnings.</string>
+    <string name="menu_report_decision">Open this after Run forecast. One page of the approved year, both forecasts, targets and economic warnings.</string>
     <string name="open_report">Open meeting report</string>
     <string name="report_title">Meeting report</string>
     <string name="report_subtitle">For review on a phone or by email</string>

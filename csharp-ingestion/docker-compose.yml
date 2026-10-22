@@ -1,4 +1,4 @@
-# Runs the full system locally: PostgreSQL, the C# ingestion API and the Python forecasting API.
+# Runs the full system locally: PostgreSQL, the C# ingestion API, the Python forecasting API and the Spring Boot API.
 name: budget-system
 
 services:
@@ -28,7 +28,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=budget_prototype;Username=budget;Password=${POSTGRES_PASSWORD}
-    # No login yet: localhost only. Remove ports once java-api joins and calls http://api:8080 internally.
+    # Host port for Swagger. The Java API calls this service at http://api:8080.
     ports:
       - "127.0.0.1:5080:8080"
     depends_on:
@@ -41,12 +41,36 @@ services:
     container_name: budget-forecast
     environment:
       DATABASE_URL: postgresql://budget:${POSTGRES_PASSWORD}@postgres:5432/budget_prototype
-    # No login yet: localhost only. Remove ports once java-api joins and calls http://forecast:8000 internally.
+    # Host port for the docs page. The Java API calls this service at http://forecast:8000.
     ports:
       - "127.0.0.1:5090:8000"
     depends_on:
       postgres:
         condition: service_healthy
+
+  java-api:
+    build:
+      context: ../java-api
+    container_name: budget-java-api
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: budget_prototype
+      POSTGRES_USER: budget
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # Ports inside the Docker network, not the host ports 5090 and 5080.
+      FORECAST_BASE_URL: http://forecast:8000
+      ALERTS_BASE_URL: http://api:8080
+      SERVER_PORT: 8080
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
+      forecast:
+        condition: service_started
 
 volumes:
   budget_pgdata:

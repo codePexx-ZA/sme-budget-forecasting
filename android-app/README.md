@@ -25,7 +25,7 @@ The theme and colours in `res/values/themes.xml` and `colors.xml` are shared too
 |---|---|
 | Submitter | Budget submissions: create, edit and submit income statements |
 | Approver | Review submissions: approve or reject waiting submissions |
-| Decision Maker | Meeting report, budget submissions (view only), KPI targets, forecasts and economic warnings |
+| Decision Maker | Budget submissions (view only), KPI targets, forecasts and economic warnings, then the meeting report |
 
 The meeting report and the forecast screen use a section heading, then a label with its figure on the same row. The emailed report stays plain text.
 

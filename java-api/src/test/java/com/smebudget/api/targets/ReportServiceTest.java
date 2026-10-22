@@ -51,9 +51,9 @@ class ReportServiceTest {
                 "No forecast has been run yet.",
                 "Not in these figures: 1 submission is waiting for approval.",
                 List.of(new MeetingReport.ApprovalNote("Alex Approver (Test)", "12 Apr 2026", "2021-03-01 to 2026-02-28", "")),
-                List.of(new MeetingReport.ComparisonRow("Revenue", "R 5,420,000.00", "n/a", "n/a")),
+                List.of(new MeetingReport.ComparisonRow("Revenue", "R 5,420,000.00", "n/a", "n/a", null, null)),
                 List.of(new MeetingReport.Fact("Gross profit", "R 2,000,000.00", null)),
-                List.of(new MeetingReport.TargetLine("Revenue", "R 5,800,000.00", "2026-03-01", null, null, null)),
+                List.of(new MeetingReport.TargetLine("Revenue", "R 5,800,000.00", "2026-03-01", null, null, null, null, null)),
                 List.of(new MeetingReport.WarningLine("warning", "Fuel is up")),
                 "");
 
@@ -65,6 +65,20 @@ class ReportServiceTest {
         assertTrue(text.contains("R 5,420,000.00"));
         assertTrue(text.contains("Fuel is up"));
         assertTrue(text.contains("waiting for approval"));
+    }
+
+    @Test
+    void forecastToneTreatsAHigherCostAsWorse() {
+        BigDecimal last = new BigDecimal("100");
+        BigDecimal higher = new BigDecimal("120");
+        BigDecimal lower = new BigDecimal("80");
+
+        assertEquals("favorable", ReportService.forecastTone(higher, last, true));
+        assertEquals("unfavorable", ReportService.forecastTone(lower, last, true));
+        assertEquals("unfavorable", ReportService.forecastTone(higher, last, false));
+        assertEquals("favorable", ReportService.forecastTone(lower, last, false));
+        assertEquals(null, ReportService.forecastTone(last, last, true));
+        assertEquals(null, ReportService.forecastTone(null, last, true));
     }
 
     @Test

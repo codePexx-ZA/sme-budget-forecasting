@@ -100,7 +100,4 @@ This service does **not** create tables or insert reference data; both come from
 
 It writes `data_source`, `external_indicator` and `rule_alert`, and reads `rule_definition`, `indicator_type`, `indicator_category_link` and `line_category`.
 
-## Next steps
-
-- The Android app reads alerts and indicators from `/api/indicators/alerts` and `/api/indicators/catalog`.
-- Income statement Excel importer (template + label mapping), after D4.
+The Android app does not call this service. `java-api` reads `GET /api/indicators/alerts` and shows the warnings to a decision maker.

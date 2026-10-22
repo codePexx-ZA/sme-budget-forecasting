@@ -1,6 +1,7 @@
 package com.smebudget.api.targets;
 
 import com.smebudget.api.auth.AuthenticatedUser;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
  * Meeting report (Boitu). One read of everything already saved for this business unit.
  *
  * <pre>
- * GET /api/reports/meeting          any logged-in user, own business unit
- * GET /api/reports/financial-year   any logged-in user, this business's year-end
+ * GET /api/reports/meeting          decision maker, own business unit
+ * GET /api/reports/financial-year   any logged-in user, this business's year-end (submission form)
  * </pre>
  */
 @RestController
@@ -25,6 +26,7 @@ public class ReportController {
     }
 
     @GetMapping("/meeting")
+    @PreAuthorize("hasRole('DECISION_MAKER')")
     public MeetingReport meeting(@AuthenticationPrincipal AuthenticatedUser user) {
         return reports.meetingReport(user);
     }

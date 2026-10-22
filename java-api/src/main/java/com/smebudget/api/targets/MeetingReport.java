@@ -26,7 +26,9 @@ public record MeetingReport(
             String category,
             String lastYear,
             String movingAverage,
-            String exponentialSmoothing
+            String exponentialSmoothing,
+            String movingAverageTone,
+            String exponentialSmoothingTone
     ) {
     }
 
@@ -45,7 +47,9 @@ public record MeetingReport(
             String period,
             String lastYear,
             String movingAverage,
-            String exponentialSmoothing
+            String exponentialSmoothing,
+            String movingAverageTone,
+            String exponentialSmoothingTone
     ) {
     }
 

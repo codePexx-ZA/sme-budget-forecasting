@@ -78,4 +78,17 @@ INSERT INTO kpi_target (unit_id, metric_name, target_value, measurement_unit, ta
     ('20000000000000000000000000000001', 'Gross profit margin',      40, 'percent', '2026-03-01'),
     ('20000000000000000000000000000001', 'Electricity cost',     125000, 'ZAR',     '2026-03-01');
 
+-- Open warnings so Forecasts and alerts and the meeting report are not empty before anyone runs ingestion.
+INSERT INTO rule_alert (alert_id, rule_id, unit_id, severity, message, resolution_status, created_at)
+SELECT v.alert_id, r.rule_id, '20000000000000000000000000000001', 'warning', v.message, 'open', '2026-04-12 15:00:00+02'
+FROM (VALUES
+    ('50000000000000000000000000000001', 'Fuel price increase above threshold',
+     'South Africa Fuel price change for 2025 is 14.20% (threshold 10.0%). Review forecasts for: Transport and fuel.'),
+    ('50000000000000000000000000000002', 'Electricity price increase above threshold',
+     'South Africa Electricity price change for 2025 is 12.80% (threshold 10.0%). Review forecasts for: Electricity.'),
+    ('50000000000000000000000000000003', 'Headline CPI above threshold',
+     'South Africa Consumer inflation (headline CPI) for 2025 is 7.10% (threshold 6.0%). Review forecasts for: Cost of sales.')
+) AS v(alert_id, rule_name, message)
+JOIN rule_definition r ON r.rule_name = v.rule_name;
+
 COMMIT;
